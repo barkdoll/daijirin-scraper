@@ -45,9 +45,7 @@ entries = []
 # Takes multi-definition entries and generates a list for output
 multi_divs = entry.find_all('div', style="margin-left:1.2em;")
 
-
-# I need to make this part a function that takes the term as an argument and runs through the code with it!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# TODO: Put this in function so that multiple definitions can be generated for entries list
 
 # Checks for multiple definitions and adds list tags for proper html structure
 if len(multi_divs) > 1:
@@ -92,7 +90,4 @@ else:
 print('\nEntries: ')
 for x in entries:
     print(x)
-
-
-# #cont > div:nth-child(6) > div > div.NetDicBody > div > div > div > div
 
