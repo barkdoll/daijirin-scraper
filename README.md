@@ -1,6 +1,6 @@
 # Daijirin Scraper | 大辞林 スクレーパー
 ## Purpose of this script
-To scrape dictionary definition data from [weblio.jp](http://www.weblio.jp/) for definitions from the all-wonderful 三省堂 大辞林 (Daijirin), a monolingual Japanese dictionary. IT then parses the proper HTML to it for use with my proprietary Anki definition template (CSS styles for this template will be available when I get closer to finishing the add-on).
+To scrape dictionary definition data from [weblio.jp](http://www.weblio.jp/) for definitions from the all-wonderful 三省堂 大辞林 (Daijirin), a monolingual Japanese dictionary. It then parses the proper HTML to it for use with my proprietary Anki definition template (CSS stylesheet for this template will be available when I get closer to finishing the add-on).
 
 ## Goals for this project
 This is my first script written in Python. I would like to eventually create a GUI in PyQt so that it can be bundled and shipped directly into Anki as a shared add-on.
