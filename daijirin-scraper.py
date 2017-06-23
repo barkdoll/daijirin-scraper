@@ -1,5 +1,3 @@
-# Should change this to scrape weblio.jp instead of kotobank. They have a SLIGHTLY easier structure to work with for extracting the dictionary data
-
 import bs4 as bs
 import urllib.request
 import urllib.parse
