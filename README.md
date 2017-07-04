@@ -8,11 +8,43 @@ This is my first script written in Python. I would like to eventually create a G
 ## Now
 Right now it can be ran through the Python 3 interpreter and scrape for a word passed in as an argument immediately following the script. Tested with Python 3.6.1
 
-## Imported modules used in this script
+## Instructions
+To run the script and add a definition to the **definitions.txt** file, go to the directory where the script is downloaded to and run the following command.
+
+**Git bash / Linux / Mac**
+```
+python.exe daijirin-scraper.py 言葉
+```
+**Windows cmd** (_**.exe**_ does not need to be stated for executables in your Windows path)
+```
+python daijirin-scraper.py 言葉
+```
+(言葉 can obviously be replaced with any term you would like to try)
+
+Then with your favirite text editor, open the **definitions.txt** file located in the same directory as the script. If your term's definition was able to be located by the scraper, it should have added it to the file with the brackets and proper HTML tags. If not, there could possibly be no entries for the search you tried or the word may have too many nest levels (see warning below). In that case I would go to the [weblio.jp](http://www.weblio.jp/) site and see for yourself what happened.
+
+Once you have the desired defnitions in **definitions.txt**, you can run:
+```
+python(.exe) daijirin-scraper.py cut
+```
+
+This will cut the definitions from the text file into your clipboard so you can paste into your Anki card fields. After running this command, **definitions.txt** will be empty so that it is ready when you want to use it next.
+
+If you only want to empty the **definitions.txt** file without copying them to your clipboard, you can run:
+```
+python(.exe) daijirin-scraper.py clear
+```
+to clear the file.
+
+
+## Dependencies, required modules, etc.
+* Obviously, you will need Python installed (v3.6)
 * BeautfulSoup4
 * urllib.request
 * urllib.parse
 * sys
+* os
+* pyperclip
 
 ### Warning: this add-on will only support single-level nested definitions. 
 It will not support multi-level nested definitions. At that point, I think you would be doing yourself a disservice listing out an entire definition on a flash card. Also, with Weblio's terrible web architecture, the means by which creating something that could extract multi-level nests would not be an efficient effort, and I need to focus my time and energy on other things (like studying Japanese and building more tools to help people learn languages). 
