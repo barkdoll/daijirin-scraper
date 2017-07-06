@@ -130,13 +130,3 @@ elif term == 'cut':
     cut()
 else:
     search()
-
-
-# TODO: Create function for clearing all items from entries list
-
-
-
-# TODO: Add GUI for Anki and add command that automatically fills the user's specified definition field.
-
-# TODO: 1. GUI should contain dropdown menu to select desired field.
-# TODO: 2. In the case of multiple entries, the ability to select one that the user would like to use.

@@ -46,7 +46,12 @@ to clear the file.
 * os
 * pyperclip
 
-### Warning: this add-on will only support single-level nested definitions. 
-It will not support multi-level nested definitions. At that point, I think you would be doing yourself a disservice listing out an entire definition on a flash card. Also, with Weblio's terrible web architecture, the means by which creating something that could extract multi-level nests would not be an efficient effort, and I need to focus my time and energy on other things (like studying Japanese and building more tools to help people learn languages). 
+### Warning: this add-on will only support single-level nested definitions.
+It will not support multi-level nested definitions. At that point, I think you would be doing yourself a disservice listing out an entire definition on a flash card. Also, with Weblio's terrible web architecture, the means by which creating something that could extract multi-level nests would not be an efficient effort, and I need to focus my time and energy on other things (like studying Japanese and building more tools to help people learn languages).
 
 If you need to reference a word with a lengthy multi-nested list of definitions, I would suggest finding the one or two specific definitions that describe the word's usage in the flash card's context, and copy-pasting those manually into your cards.
+
+### Currrent objectives:
+1. Add aqt GUI for Anki and add command that automatically fills the user's specified definition field.
+2. GUI should contain a dropdown menu to select the Anki note field where definitions will be injected.
+3. Create multiple-entry functionality for words with more than one pronunciation/entry using _find_all_. Allow user to select the desired entry from a generated list from the _find_all_ implementation.
