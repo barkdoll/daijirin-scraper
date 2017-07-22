@@ -29,10 +29,13 @@ def cut():
     # Clears the contents of the file
     clear()
 
+# Outputs definitions.txt to the console
 def list():
-    # Shows successful output in console
-    read_file = open('definitions.txt', 'rb')
-    print(read_file.read().decode('utf-8'))
+    if os.stat("definitions.txt").st_size == 0:
+        print("\nThere's no definitions to show!")
+    else:
+        read_file = open('definitions.txt', 'rb')
+        print('\n', read_file.read().decode('utf-8'))
 
 def search():
     # Normally, you would use 'a' as the second argument in the open() method to open a file in append mode.
@@ -49,7 +52,6 @@ def search():
             text_file.write(html.encode('utf-8'))
         else:
             text_file.write(('\n\n<div>' + html + '</div>').encode('utf-8'))
-        print(html)
 
     # Creates an ASCII-friendly URL to query a webbrowser search
     converted_term = urllib.parse.quote(term, safe='')
@@ -158,6 +160,9 @@ def search():
         definition = ' '.join(one_div.split())
         html = '【' + term + '】 ' + yomigana + '<br />\n' + definition
         push_entry()
+
+    # Shows successful output in console
+    print('\n', html)
 
 
 # Script Execution
