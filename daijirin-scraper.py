@@ -14,6 +14,7 @@ sys.tracebacklimit = None
 # if you have your definitions file somewhere else on your computer?
 # text_file = open('definitions.txt')
 
+
 # Clears the text file if the 'clear' argument is passed
 def clear():
     clear_file = open('definitions.txt', 'w')
@@ -29,13 +30,15 @@ def cut():
     # Clears the contents of the file
     clear()
 
+
 # Outputs definitions.txt to the console
-def list():
+def list_defs():
     if os.stat("definitions.txt").st_size == 0:
         print("\nThere's no definitions to show!")
     else:
         read_file = open('definitions.txt', 'rb')
         print('\n', read_file.read().decode('utf-8'))
+
 
 def search():
     # Normally, you would use 'a' as the second argument in the open() method to open a file in append mode.
@@ -70,7 +73,7 @@ def search():
         # TODO: figure out how to hide the AttributeError output
         except AttributeError:
             print(
-                "\nSorry! We couldn\'t find any 大辞林 definitions for \'{0}\'.\nTry another term or check your input.".format(
+                "\nSorry! We couldn\'t find any 大辞林 definitions for \'{0}\'.\nTry another term or check your input.\n".format(
                     term))
 
     # Locates the header div that indicates the following definition is a Daijirin definition
@@ -79,8 +82,7 @@ def search():
     # Finds the following div containing the Daijirin definitions
     entry = daiji_header.find_next_sibling('div', class_='kijiWrp')
 
-    # Outputs all Daijirin headers to a list for the user to choose from
-    # If there is only one, it will be selected automatically
+    # Outputs Daijirin header(s) to a list for the user to choose from
     entry_head = entry.find_all('div', class_='NetDicHead')
 
     # Function that obtains user-chosen header for defnition output
@@ -100,12 +102,9 @@ def search():
                 except IndexError:
                     print("Error: enter a number that's on the list.")
                     continue
-
-        elif len(header_list) == 1:
-            # If there is only one entry head, it sets it as the chosen entry header for extracting definitions.
-            chosen = header_list[0]
+        # If there is only one header, it will be selected automatically for extracting defintions
         else:
-            print("Error: no entries found in entry_head list")
+            chosen = header_list[0]
         return chosen
 
     # Runs the above function to get the proper header
@@ -124,8 +123,6 @@ def search():
 
     for n in def_numbers:
         defs.append(n.next_sibling)
-
-    # TODO: Put this in function so that multiple definitions can be generated for entries list
 
     # Checks for multiple definitions and adds list tags for proper html structure
     if len(defs) > 1:
@@ -173,6 +170,6 @@ if term == 'clear':
 elif term == 'cut':
     cut()
 elif term == 'list':
-    list()
+    list_defs()
 else:
     search()
