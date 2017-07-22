@@ -1,16 +1,21 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow
-from PyQt5.QtGui import QIcon
+from PyQt5 import QtWidgets, QtGui
 
 
-class Window(QMainWindow):
-    def __init__(self):
-        super(Window, self).__init__()
-        self.setGeometry(50,50,500,300)
-        self.setWindowTitle('Daijirin Definition Grabber')
-        # self.setWindowIcon('pic.png')
-        self.show()
+class Window():
+   app = QtWidgets.QApplication(sys.argv)
+   w = QtWidgets.QWidget()
 
-app = QApplication(sys.argv)
-Gui = Window()
-sys.exit(app.exec_())
+   vBox = QtWidgets.QVBoxLayout()
+   vBox.addWidget(w)
+
+   hBox = QtWidgets.QHBoxLayout()
+   hBox.addLayout(vBox)
+
+   w.setGeometry(50,50,800,300)
+   w.setWindowTitle('Daijirin Definition Grabber')
+   w.setWindowIcon(QtGui.QIcon('daijiscrape/icon.png'))
+   w.show()
+   sys.exit(app.exec_())
+
+Window()
