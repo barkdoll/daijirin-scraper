@@ -29,6 +29,10 @@ def cut():
     # Clears the contents of the file
     clear()
 
+def list():
+    # Shows successful output in console
+    read_file = open('definitions.txt', 'rb')
+    print(read_file.read().decode('utf-8'))
 
 def search():
     # Normally, you would use 'a' as the second argument in the open() method to open a file in append mode.
@@ -45,6 +49,7 @@ def search():
             text_file.write(html.encode('utf-8'))
         else:
             text_file.write(('\n\n<div>' + html + '</div>').encode('utf-8'))
+        print(html)
 
     # Creates an ASCII-friendly URL to query a webbrowser search
     converted_term = urllib.parse.quote(term, safe='')
@@ -152,7 +157,6 @@ def search():
 
         definition = ' '.join(one_div.split())
         html = '【' + term + '】 ' + yomigana + '<br />\n' + definition
-
         push_entry()
 
 
@@ -163,5 +167,7 @@ if term == 'clear':
     clear()
 elif term == 'cut':
     cut()
+elif term == 'list':
+    list()
 else:
     search()
