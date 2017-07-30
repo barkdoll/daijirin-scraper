@@ -11,15 +11,19 @@ Right now it can be ran through the Python 3 interpreter and scrape for a word p
 ## Instructions
 To run the script and add a definition to the **definitions.txt** file, go to the directory where the script is downloaded to and run the following command.
 
-**Git bash / Linux / Mac**
+**Git bash on Windows / Linux / Mac**
+
+**NOTE:** _the Windows git bash terminal must be installed with the option to emulate inside of **cmd.exe**. The reason is the default git bash terminal that git will install gives you unicode charmap encoding errors when trying to execute the python script. I have included a screenshot below<sup>**1**</sup> to show the needed installation option._
+
 ```
 python.exe daijirin-scraper.py 言葉
 ```
-**Windows cmd** (_**.exe**_ does not need to be stated for executables in your Windows path)
-```
-python daijirin-scraper.py 言葉
-```
 (言葉 can obviously be replaced with any term you would like to try)
+
+You can alternatively make a shell script (e.g. - daijirin-scraper.sh), add it to a directory in your path, and run it like this:
+```
+daijirin-scraper.sh 言葉
+```
 
 Then with your favirite text editor, open the **definitions.txt** file located in the same directory as the script. If your term's definition was able to be located by the scraper, it should have added it to the file with the brackets and proper HTML tags. If not, there could possibly be no entries for the search you tried or the word may have too many nest levels (see warning below). In that case I would go to the [weblio.jp](http://www.weblio.jp/) site and see for yourself what happened.
 
@@ -51,7 +55,15 @@ It will not support multi-level nested definitions. At that point, I think you w
 
 If you need to reference a word with a lengthy multi-nested list of definitions, I would suggest finding the one or two specific definitions that describe the word's usage in the flash card's context, and copy-pasting those manually into your cards.
 
-### Currrent objectives:
+### Currrent TODOs:
 1. Add aqt GUI for Anki and add command that automatically fills the user's specified definition field.
 2. GUI should contain a dropdown menu to select the Anki note field where definitions will be injected.
 3. Create multiple-entry functionality for words with more than one pronunciation/entry using _find_all_. Allow user to select the desired entry from a generated list from the _find_all_ implementation.
+
+## Footnotes:
+
+### <sup>1</sup> Windows git bash required installation option:
+
+![Alt text](readme/windows-option.png "Option needed for Windows git bash installation")
+
+This screen with shows the correctly selected bullet option for using the cmd emulator to run git bash. Git bash must be installed with the following option below in order to avoid charmap encoding errors with this web scraper.
