@@ -3,7 +3,7 @@
 To scrape dictionary definition data from [weblio.jp](http://www.weblio.jp/) for definitions from the all-wonderful 三省堂 大辞林 (Daijirin), a monolingual Japanese dictionary. It then parses the proper HTML to it for use with my proprietary Anki definition template. The template is included in the file **daijirin-scraper-example-card-layout.apkg**, which you can double click and import directly into Anki (desktop version).
 
 ## Goals for this project
-This is my first script written in Python. I would like to eventually create a GUI in PyQt so that it can be bundled and shipped directly into Anki as a shared add-on.
+This is my first script written in Python. I would like to eventually create a GUI in PyQt so that it can be bundled and shipped directly into Anki as a shared add-on.<sup>2</sup>
 
 ## Now
 Right now it can be ran through the Python 3 interpreter and scrape for a word passed in as an argument immediately following the script. Tested with Python 3.6.1
@@ -13,7 +13,7 @@ To run the script and add a definition to the **definitions.txt** file, go to th
 
 **Git bash on Windows / Linux / Mac**
 
-**NOTE:** _the Windows git bash terminal must be installed with the option to emulate inside of **cmd.exe**. The reason is the default git bash terminal that git will install gives you unicode charmap encoding errors when trying to execute the python script. I have included a screenshot and instructions below.<sup>**1**</sup>_
+**NOTE:** _the Windows git bash terminal must be installed with the option to emulate inside of **cmd.exe**. The reason is the default git bash terminal that git will install gives you unicode charmap encoding errors when trying to execute the python script. I have included a screenshot and instructions below._<sup>1</sup>
 
 ```
 python.exe daijirin-scraper.py 言葉
@@ -50,19 +50,14 @@ to clear the file.
 * os
 * pyperclip
 
-### Warning: this add-on will only support single-level nested definitions.
+### NOTE: this add-on will only support single-level nested definitions.
 It will not support multi-level nested definitions. At that point, I think you would be doing yourself a disservice listing out an entire definition on a flash card. Also, with Weblio's terrible web architecture, the means by which creating something that could extract multi-level nests would not be an efficient effort, and I need to focus my time and energy on other things (like studying Japanese and building more tools to help people learn languages).
 
 If you need to reference a word with a lengthy multi-nested list of definitions, I would suggest finding the one or two specific definitions that describe the word's usage in the flash card's context, and copy-pasting those manually into your cards.
 
-### Currrent TODOs:
-1. Add aqt GUI for Anki and add command that automatically fills the user's specified definition field.
-2. GUI should contain a dropdown menu to select the Anki note field where definitions will be injected.
-3. Create multiple-entry functionality for words with more than one pronunciation/entry using _find_all_. Allow user to select the desired entry from a generated list from the _find_all_ implementation.
-
 ## Footnotes:
 
-### <sup>1</sup> Windows git bash required installation option:
+### 1. Windows git bash required installation option:
 
 ![Alt text](readme/windows-option.png "Option needed for Windows git bash installation")
 
@@ -74,3 +69,8 @@ You will also need to change the git bash (cmd.exe) window's font to one that ha
 1. Open git bash.
 2. Right click on the title bar and click _Properties_.
 3. Select the font tab at the top of the menu and choose one from the list.
+
+### 2. Current TODOs:
+1. Add aqt GUI for Anki and add command that automatically fills the user's specified definition field.
+2. GUI should contain a dropdown menu to select the Anki note field where definitions will be injected.
+3. Create multiple-entry functionality for words with more than one pronunciation/entry using _find_all_. Allow user to select the desired entry from a generated list from the _find_all_ implementation.
