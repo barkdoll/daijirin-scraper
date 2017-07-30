@@ -13,7 +13,7 @@ To run the script and add a definition to the **definitions.txt** file, go to th
 
 **Git bash on Windows / Linux / Mac**
 
-**NOTE:** _the Windows git bash terminal must be installed with the option to emulate inside of **cmd.exe**. The reason is the default git bash terminal that git will install gives you unicode charmap encoding errors when trying to execute the python script. I have included a screenshot below<sup>**1**</sup> to show the needed installation option._
+**NOTE:** _the Windows git bash terminal must be installed with the option to emulate inside of **cmd.exe**. The reason is the default git bash terminal that git will install gives you unicode charmap encoding errors when trying to execute the python script. I have included a screenshot and instructions below.<sup>**1**</sup>_
 
 ```
 python.exe daijirin-scraper.py 言葉
@@ -66,4 +66,11 @@ If you need to reference a word with a lengthy multi-nested list of definitions,
 
 ![Alt text](readme/windows-option.png "Option needed for Windows git bash installation")
 
-This screen with shows the correctly selected bullet option for using the cmd emulator to run git bash. Git bash must be installed with the following option below in order to avoid charmap encoding errors with this web scraper.
+This screen shows the correctly selected bullet option for using the cmd emulator to run git bash.
+
+You will also need to change the git bash (cmd.exe) window's font to one that has Japanese glyphs. MS Gothic / MS Mincho will work, but they're pretty ugly in the terminal. I use the OsakaMono font and it looks good.
+
+#### How to change the font:
+1. Open git bash.
+2. Right click on the title bar and click _Properties_.
+3. Select the font tab at the top of the menu and choose one from the list.
