@@ -3,7 +3,7 @@
 To scrape dictionary definition data from [weblio.jp](http://www.weblio.jp/) for definitions from the all-wonderful 三省堂 大辞林 (Daijirin), a monolingual Japanese dictionary. It then parses the proper HTML to it for use with my proprietary Anki definition template. The template is included in the file **daijirin-scraper-example-card-layout.apkg**, which you can double click and import directly into Anki (desktop version).
 
 ## Goals for this project
-This is my first script written in Python. I would like to eventually create a GUI in PyQt so that it can be bundled and shipped directly into Anki as a shared add-on.[<sup>2</sup>](#1-windows-git-bash-required-installation-option)
+This is my first script written in Python. I would like to eventually create a GUI in PyQt so that it can be bundled and shipped directly into Anki as a shared add-on.[<sup>2</sup>](#2-current-todos)
 
 ## Now
 Right now it can be ran through the Python 3 interpreter and scrape for a word passed in as an argument immediately following the script. Tested with Python 3.6.1
@@ -13,7 +13,7 @@ To run the script and add a definition to the **definitions.txt** file, go to th
 
 **Git bash on Windows / Linux / Mac**
 
-**NOTE:** _the Windows git bash terminal must be installed with the option to emulate inside of **cmd.exe**. The reason is the default git bash terminal that git will install gives you unicode charmap encoding errors when trying to execute the python script. I have included a screenshot and instructions below._[<sup>1</sup>](#2-current-todos)
+**NOTE:** _the Windows git bash terminal must be installed with the option to emulate inside of **cmd.exe**. The reason is the default git bash terminal that git will install gives you unicode charmap encoding errors when trying to execute the python script. I have included a screenshot and instructions below._[<sup>1</sup>](#1-windows-git-bash-required-installation-option)
 
 ```
 python.exe daijirin-scraper.py 言葉
