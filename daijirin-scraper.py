@@ -91,7 +91,7 @@ def search():
             # If there is more than one entry head, user must choose one from the console.
             for q, choices in enumerate(header_list, 1):
                 text = choices.get_text().encode('utf-8')
-                print(u'#', q, u'. ' + text.decode('utf-8'))
+                print(u'{0}. '.format(q) + text.decode('utf-8'))
 
             print("Choose which one you would like by typing the entry's number and pressing enter: ")
             # Checks if the user's input is a valid number from the listing
