@@ -114,6 +114,10 @@ def search():
     # Finds the yomigana for the word
     yomigana = chosen_head.find('b').get_text()
 
+    # Omits repetitive yomigana if term is strictly in hiragana
+    if yomigana == term:
+        yomigana = ''
+
     # Takes multi-definition entries and generates a list for output
     def_numbers = chosen_body.find_all('div', style="float:left")
 
