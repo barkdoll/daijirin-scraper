@@ -63,8 +63,8 @@ def search():
     # Opens the url and extracts the source html usings bs4
     sauce = urllib.request.urlopen(url)
     soup = bs.BeautifulSoup(sauce, 'lxml')
-    daijirin = soup.find('a', href="https://www.weblio.jp/cat/dictionary/ssdjj")
-
+    daijirin = soup.find('a', href="http://www.weblio.jp/cat/dictionary/ssdjj")
+    
     # Function used to locate Daijirin section of the web page
     def get_header():
         try:
