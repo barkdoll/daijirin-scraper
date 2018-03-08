@@ -163,7 +163,7 @@ def search():
         push_entry()
 
     # Shows successful output in console
-    print('\n', html)
+    print('\n', html, '\n')
 
 
 # Script Execution
