@@ -34,17 +34,21 @@ def cut():
 # Outputs definitions.txt to the console
 def list_defs():
     if os.stat("definitions.txt").st_size == 0:
-        print("\nThere's no definitions to show!")
+        print("\nThere's no definitions to show!\n")
     else:
         read_file = open('definitions.txt', 'rb')
-        print('\n', read_file.read().decode('utf-8'))
+        print('\n', read_file.read().decode('utf-8'), '\n')
 
 
 def search():
-    # Normally, you would use 'a' as the second argument in the open() method to open a file in append mode.
-    # Append mode is the same as write mode, but does not overwrite original file contents).
-    # But since the final output needs to be unicode, you have to encode it into UTF-8 bytes isntead of a string.
-    # Therefore, you have to use 'wb' as the second arg, which I think means write binary.
+    # Normally, you would use 'a' as the second argument
+    # in the open() method to open a file in append mode.
+    # Append mode is the same as write mode,
+    # but does not overwrite original file contents).
+    # But since the final output needs to be unicode,
+    # you have to encode it into UTF-8 bytes isntead of a string.
+    # Therefore, you have to use 'wb' as the second arg,
+    # which I think means write binary.
 
     text_file = open('definitions.txt', 'ab')
 
@@ -63,7 +67,9 @@ def search():
     # Opens the url and extracts the source html usings bs4
     sauce = urllib.request.urlopen(url)
     soup = bs.BeautifulSoup(sauce, 'lxml')
-    daijirin = soup.find('a', href="https://www.weblio.jp/cat/dictionary/ssdjj")
+    daijirin = soup.find(
+        'a', href="https://www.weblio.jp/cat/dictionary/ssdjj"
+    )
 
     # Function used to locate Daijirin section of the web page
     def get_header():
@@ -73,10 +79,12 @@ def search():
         # TODO: figure out how to hide the AttributeError output
         except AttributeError:
             print(
-                "\nSorry! We couldn\'t find any 大辞林 definitions for \'{0}\'.\nTry another term or check your input.\n".format(
-                    term))
+                """\nSorry! We couldn\'t find any 大辞林 definitions for \'{0}\'.
+                \nTry another term or check your input.\n""".format(term)
+            )
 
-    # Locates the header div that indicates the following definition is a Daijirin definition
+    # Locates the header div that indicates the following definition
+    # is a Daijirin definition
     daiji_header = get_header()
 
     # Finds the following div containing the Daijirin definitions
@@ -88,12 +96,18 @@ def search():
     # Function that obtains user-chosen header for defnition output
     def choose_header(header_list):
         if len(header_list) > 1:
-            # If there is more than one entry head, user must choose one from the console.
+            # If there is more than one entry head,
+            # user must choose one from the console.
+            print('''
+Choose which one you would like by typing
+the entry's number and press Enter:\n''')
             for q, choices in enumerate(header_list, 1):
                 text = choices.get_text().encode('utf-8')
                 print(u'{0}. '.format(q) + text.decode('utf-8'))
 
-            print("Choose which one you would like by typing the entry's number and pressing enter: ")
+            # The extra space looks clean :)
+            print('')
+
             # Checks if the user's input is a valid number from the listing
             while True:
                 try:
@@ -102,7 +116,8 @@ def search():
                 except IndexError:
                     print("Error: enter a number that's on the list.")
                     continue
-        # If there is only one header, it will be selected automatically for extracting defintions
+        # If there is only one header, it will be selected
+        # automatically for extracting defintions
         else:
             chosen = header_list[0]
         return chosen
@@ -128,7 +143,8 @@ def search():
     for n in def_numbers:
         defs.append(n.next_sibling)
 
-    # Checks for multiple definitions and adds list tags for proper html structure
+    # Checks for multiple definitions and
+    # adds list tags for proper html structure
     if len(defs) > 1:
         stripped = []
 
@@ -150,7 +166,8 @@ def search():
 
         html.append('</ol>')
 
-        # Converts html list to one whole string for pushing to the entries list
+        # Converts html list to one whole string
+        # for pushing to the entries list
         html = '\n'.join(html)
         push_entry()
 
