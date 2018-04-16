@@ -20,12 +20,17 @@ python.exe daijirin-scraper.py 言葉
 ```
 (言葉 can obviously be replaced with any term you would like to try)
 
-You can alternatively make a shell script (e.g. - _daijirin-scraper.sh_) as a shortcut for these commands, add it to a directory in your path, and run it like this:
+You can alternatively make a shell script (e.g. - `daijirin-scraper.sh`) as a shortcut for these commands, add it to a directory in your path, and run it like this:
 ```
 daijirin-scraper.sh 言葉
 ```
 
-Then with your favorite text editor, open the **definitions.txt** file located in the same directory as the script. If your term's definition was able to be located by the scraper, it should have added it to the file with the brackets and proper HTML tags. If not, there could possibly be no entries for the search you tried or the word may have too many nest levels (see warning below). In that case I would go to the [weblio.jp](http://www.weblio.jp/) site and see for yourself what happened.
+If the entered term was found, it will be printed to the console along with the definitions and added to **definitions.txt**. If the term could not be found, an error will print stating that no terms matched. In some cases you might need to search for the term manually on [weblio.jp](http://www.weblio.jp/).
+
+You can view your stored definitions with:
+```
+python.exe daijirin-scraper.py list
+```
 
 Once you have the desired defnitions in **definitions.txt**, you can run:
 ```
@@ -34,11 +39,10 @@ python.exe daijirin-scraper.py cut
 
 This will cut the definitions from the text file into your clipboard so you can paste into your Anki card fields. After running this command, **definitions.txt** will be empty so that it is ready when you want to use it next.
 
-If you only want to empty the **definitions.txt** file without copying them to your clipboard, you can run:
+If you want to clear the **definitions.txt** file without copying them due to a mistake or otherwise, you can run:
 ```
 python.exe daijirin-scraper.py clear
 ```
-to clear the file.
 
 
 ## Dependencies, required modules, etc.
