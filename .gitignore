@@ -2,3 +2,4 @@
 deflist-stolen-from-pfpack-anki-addon.py
 *.pyc
 .editorconfig
+.vscode/
