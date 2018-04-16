@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import bs4 as bs
-import urllib.request
-import urllib.parse
-import sys
 import os
+import sys
+import urllib.parse
+import urllib.request
+
+import bs4 as bs
 import pyperclip
 
 # Turn this off to see tracebacks for debugging
@@ -46,9 +47,9 @@ def search():
     # Append mode is the same as write mode,
     # but does not overwrite original file contents).
     # But since the final output needs to be unicode,
-    # you have to encode it into UTF-8 bytes isntead of a string.
-    # Therefore, you have to use 'wb' as the second arg,
-    # which I think means write binary.
+    # you have to encode it into UTF-8 bytes instead of a string.
+    # Therefore, you have to use 'ab' as the second arg,
+    # which I think means append binary.
 
     text_file = open('definitions.txt', 'ab')
 
@@ -78,10 +79,9 @@ def search():
             return grabbed
         # TODO: figure out how to hide the AttributeError output
         except AttributeError:
-            print(
-                """\nSorry! We couldn\'t find any 大辞林 definitions for \'{0}\'.
-                \nTry another term or check your input.\n""".format(term)
-            )
+            print("\nSorry! We couldn\'t find any 大辞林 definitions for " +
+                  "\'{0}\'.\nTry another term or check your input.\n"
+                  .format(term))
 
     # Locates the header div that indicates the following definition
     # is a Daijirin definition

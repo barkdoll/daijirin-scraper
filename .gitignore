@@ -1,3 +1,4 @@
 /daijiscrape
 deflist-stolen-from-pfpack-anki-addon.py
-gui.py
+*.pyc
+.editorconfig
