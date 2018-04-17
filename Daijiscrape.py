@@ -20,9 +20,6 @@ sys.tracebacklimit = None
 
 class Daijirin:
 
-    def __init__(self):
-        print('hiiii Daijirin')
-
     def search(self, term):
 
         text_file = open('definitions.txt', 'ab')
@@ -68,40 +65,34 @@ class Daijirin:
 
         entry_list = []
         entry_list.extend(entry_head)
-        for i in entry_list:
-            print('\n', i, '\n')
 
         if len(entry_list) > 1:
-            chosen_head = EntrySelectDialog(entry_list)
+            chosen_head = EntrySelectDialog(entry_list).exec_()
+            print(chosen_head)
 
-        elif len(entry_list) == 1: 
+        elif len(entry_list) == 1:
             chosen_head = entry_list[0]
-        else: 
+            print(chosen_head)
+        else:
             print('')
             # NoneFound() Dialog
 
 
-        # Function that obtains user-chosen header for defnition output
-        def choose_header(self, header_list):
-            print('')
-
-
-
 class EntrySelectDialog(QDialog):
     def __init__(self, choice_list):
-        super(EntrySelectDialog, self).__init__(choice_list)
+        super().__init__()
+        self.choice_list = choice_list
 
         self.setWindowTitle('Choose entry')
-        self.resize(500, 300)
+        self.resize(300, 300)
 
         self.listing = QListWidget()
-        self.setupList(choice_list)
-        
+        self.setupList(self.choice_list)
+
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.onAccepted)
+        self.buttonBox.accepted.connect(self.setEntry)
         self.buttonBox.rejected.connect(self.onRejected)
-
 
         w = QWidget()
         vl = QVBoxLayout()
@@ -113,10 +104,13 @@ class EntrySelectDialog(QDialog):
 
     def setupList(self, choices):
         for choice in choices:
-            self.listing.addItem( choice.get_text().encode('utf-8') )
+            c = choice.get_text()
+            self.listing.addItem(c)
 
-    def onAccepted(self, s):
-        print('accepted', s)
+    def setEntry(self):
+        print('ACCEPTED')
+        self.done()
+        return u'fuck'
 
-    def onRejected(self, s):
-        print('REJECTED', s)
+    def onRejected(self):
+        print('REJECTED')
