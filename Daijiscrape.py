@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 import bs4 as bs
 import urllib.request
 import urllib.parse
@@ -20,7 +23,7 @@ class Daijirin():
     def __init__():
         print('hi')
 
-    def search():
+    def search(term):
 
         text_file = open('definitions.txt', 'ab')
 
@@ -70,7 +73,7 @@ class Daijirin():
             if len(header_list) > 1:
                 # If there is more than one entry head,
                 # user must choose one from the console.
-                print("Choose which one you would like by typing" +
+                print("Choose which one you would like by typing " +
                       "the entry's number and press Enter:\n")
                 for q, choices in enumerate(header_list, 1):
                     text = choices.get_text().encode('utf-8')

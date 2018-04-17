@@ -8,7 +8,8 @@ import sys
 import json
 # for escaping html characters
 # import utility
-import daijirin_scraper as Daijirin
+from Daijiscrape import Daijirin
+
 
 
 class EntrySelectDialog(QDialog):
@@ -45,9 +46,7 @@ class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.setWindowTitle('''
-大辞林 definitions from weblio.jp
-''')
+        self.setWindowTitle('大辞林 definitions from weblio.jp')
         self.resize(700, 500)
 
         vl = QVBoxLayout()
@@ -55,17 +54,20 @@ class MainWindow(QMainWindow):
 
         default_font = self.setupFont()
 
-        hl_pieces = {
-            'search_box': QLineEdit(),
-            'search_btn': QPushButton('検索'),
-            'add_btn': QPushButton('追加')
-        }
+        self.search_box = QLineEdit()
+        self.search_box.setFont(default_font)
+        hl.addWidget(self.search_box)
 
-        hl_pieces['search_btn'].clicked.connect(Daijirin.search)
+        self.search_btn = QPushButton('検索')
+        self.search_btn.setFont(default_font)
+        hl.addWidget(self.search_btn)
+        
 
-        for component in hl_pieces:
-            hl_pieces[component].setFont(default_font)
-            hl.addWidget(hl_pieces[component])
+        self.add_btn = QPushButton('追加')
+        self.add_btn.setFont(default_font)
+        hl.addWidget(self.add_btn)
+
+        self.search_btn.clicked.connect(self.onSearch)
 
         output_font = QFont()
         output_font.setFamily('Meiryo')
@@ -99,6 +101,18 @@ class MainWindow(QMainWindow):
 
         font.setPointSize(pointSize)
         return font
+
+    def onSearch(self):
+        term = self.search_box.text()
+        print(term)
+        self.setWindowTitle('searching...')
+        Daijirin.search(term)
+        
+
+    
+    def onAdd(self, s):
+        print('s is ' + s)
+        print('onAdd executed')
 
     def multiEntryFind(self, s):
         print('click', s)
