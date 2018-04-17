@@ -18,12 +18,12 @@ import pyperclip
 sys.tracebacklimit = None
 
 
-class Daijirin():
+class Daijirin:
 
-    def __init__():
-        print('hi')
+    def __init__(self):
+        print('hiiii Daijirin')
 
-    def search(term):
+    def search(self, term):
 
         text_file = open('definitions.txt', 'ab')
 
@@ -61,97 +61,62 @@ class Daijirin():
         # Locates the header div that indicates the following definition
         # is a Daijirin definition
         daiji_header = get_header()
-
         # Finds the following div containing the Daijirin definitions
         entry = daiji_header.find_next_sibling('div', class_='kijiWrp')
-
         # Outputs Daijirin header(s) to a list for the user to choose from
         entry_head = entry.find_all('div', class_='NetDicHead')
 
+        entry_list = []
+        entry_list.extend(entry_head)
+        for i in entry_list:
+            print('\n', i, '\n')
+
+        if len(entry_list) > 1:
+            chosen_head = EntrySelectDialog(entry_list)
+
+        elif len(entry_list) == 1: 
+            chosen_head = entry_list[0]
+        else: 
+            print('')
+            # NoneFound() Dialog
+
+
         # Function that obtains user-chosen header for defnition output
-        def choose_header(header_list):
-            if len(header_list) > 1:
-                # If there is more than one entry head,
-                # user must choose one from the console.
-                print("Choose which one you would like by typing " +
-                      "the entry's number and press Enter:\n")
-                for q, choices in enumerate(header_list, 1):
-                    text = choices.get_text().encode('utf-8')
-                    print(u'{0}. '.format(q) + text.decode('utf-8'))
+        def choose_header(self, header_list):
+            print('')
 
-                # The extra space looks clean :)
-                print('')
 
-                # Checks if the user's input is a valid number from the listing
-                while True:
-                    try:
-                        chosen = header_list[int(input()) - 1]
-                        break
-                    except IndexError:
-                        print("Error: enter a number that's on the list.")
-                        continue
-            # If there is only one header, it will be selected
-            # automatically for extracting defintions
-            else:
-                chosen = header_list[0]
-            return chosen
 
-        # Runs the above function to get the proper header
-        chosen_head = choose_header(entry_head)
-        # Finds the body tag that contains definition(s)
-        chosen_body = chosen_head.find_next_sibling('div', class_='NetDicBody')
-        # Finds the yomigana for the word
-        yomigana = chosen_head.find('b').get_text()
+class EntrySelectDialog(QDialog):
+    def __init__(self, choice_list):
+        super(EntrySelectDialog, self).__init__(choice_list)
 
-        # Omits repetitive yomigana if term is strictly in hiragana
-        if yomigana == term:
-            yomigana = ''
+        self.setWindowTitle('Choose entry')
+        self.resize(500, 300)
 
-        # Takes multi-definition entries and generates a list for output
-        def_numbers = chosen_body.find_all('div', style="float:left")
+        self.listing = QListWidget()
+        self.setupList(choice_list)
+        
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.onAccepted)
+        self.buttonBox.rejected.connect(self.onRejected)
 
-        defs = []
-        definition = []
-        html = []
 
-        for n in def_numbers:
-            defs.append(n.next_sibling)
+        w = QWidget()
+        vl = QVBoxLayout()
+        vl.addWidget(self.listing)
+        vl.addWidget(self.buttonBox)
 
-        # Checks for multiple definitions and
-        # adds list tags for proper html structure
-        if len(defs) > 1:
-            stripped = []
+        w.setLayout(vl)
+        self.setLayout(vl)
 
-            for i in defs:
-                text = i.get_text()
-                stripped.append(text)
+    def setupList(self, choices):
+        for choice in choices:
+            self.listing.addItem( choice.get_text().encode('utf-8') )
 
-            # Removes extra whitespaces in the definition strings
-            for j in stripped:
-                definition.append(' '.join(j.split()))
+    def onAccepted(self, s):
+        print('accepted', s)
 
-            html.append('【' + term + '】 ' + yomigana)
-
-            # Creates list out of definitions
-            html.append('<ol>')
-
-            for k in definition:
-                html.append('<li>' + k + '</li>')
-
-            html.append('</ol>')
-
-            # Converts html list to one whole string
-            # for pushing to the entries list
-            html = '\n'.join(html)
-            push_entry()
-
-        # Checks for single definition and parses it in the html
-        else:
-            one_div = chosen_body.select_one("div div div").get_text()
-
-            definition = ' '.join(one_div.split())
-            html = '【' + term + '】 ' + yomigana + '<br />\n' + definition
-            push_entry()
-
-        # Shows successful output in console
-        print('\n', html, '\n')
+    def onRejected(self, s):
+        print('REJECTED', s)

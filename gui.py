@@ -8,38 +8,8 @@ import sys
 import json
 # for escaping html characters
 # import utility
-from Daijiscrape import Daijirin
+from Daijiscrape import Daijirin, EntrySelectDialog
 
-
-
-class EntrySelectDialog(QDialog):
-    def __init__(self, *args, **kwargs):
-        super(EntrySelectDialog, self).__init__(*args, **kwargs)
-
-        self.setWindowTitle('Choose entry')
-        self.resize(500, 300)
-
-        self.listing = QListWidget()
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.onAccepted)
-        self.buttonBox.rejected.connect(self.onRejected)
-
-        for i in range(10):
-            self.listing.addItem(str(i))
-        w = QWidget()
-        vl = QVBoxLayout()
-        vl.addWidget(self.listing)
-        vl.addWidget(self.buttonBox)
-
-        w.setLayout(vl)
-        self.setLayout(vl)
-
-    def onAccepted(self, s):
-        print('accepted', s)
-
-    def onRejected(self, s):
-        print('REJECTED', s)
 
 
 class MainWindow(QMainWindow):
@@ -106,7 +76,7 @@ class MainWindow(QMainWindow):
         term = self.search_box.text()
         print(term)
         self.setWindowTitle('searching...')
-        Daijirin.search(term)
+        Daijirin().search(term)
         
 
     
