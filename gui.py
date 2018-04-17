@@ -9,17 +9,115 @@ import urllib.request
 import urllib.parse
 import sys
 import os
+import re
 import pyperclip
 import json
 # for escaping html characters
 # import utility
 
 
+def Daijirin(term):
+
+    # Creates an ASCII-friendly URL to query a webbrowser search
+    converted_term = urllib.parse.quote(term, safe='')
+    url = 'https://www.weblio.jp/content/' + converted_term
+
+    # Opens the url and extracts the source html usings bs4
+    sauce = urllib.request.urlopen(url)
+    soup = bs.BeautifulSoup(sauce, 'lxml')
+    daijirin = soup.find(
+        'a', href="https://www.weblio.jp/cat/dictionary/ssdjj"
+    )
+
+    # Function used to locate Daijirin section of the web page
+    def get_header():
+        try:
+            grabbed = daijirin.find_parent('div', class_='pbarT')
+            return grabbed
+        # TODO: figure out how to hide the AttributeError output
+        except AttributeError:
+            print('none found')
+            # NoneFound(QMessageBox)
+
+    # Locates the header div that indicates the following definition
+    # is a Daijirin definition
+    daiji_header = get_header()
+
+    # Finds the following div containing the Daijirin definitions
+    entry = daiji_header.find_next_sibling('div', class_='kijiWrp')
+    # Outputs Daijirin header(s) to a list for the user to choose from
+    entry_heads = entry.find_all('div', class_='NetDicHead')
+
+
+    if len(entry_heads) > 1:
+        chosen_head = EntrySelectDialog(entry_heads).selection
+    elif len(entry_heads) == 1:
+        chosen_head = 0
+    else:
+        # NoneFound() QMessageBox
+        print('none found')
+    
+    
+    chosen_body = entry_heads[chosen_head].find_next_sibling('div', class_='NetDicBody')
+    
+    # Finds the yomigana for the word
+    yomigana = entry_heads[chosen_head].find('b').get_text()
+    # Omits repetitive yomigana if term is strictly in hiragana
+    if yomigana == term:
+        yomigana = ''
+    
+    # Takes multi-definition entries and generates a list for output
+    def_numbers = chosen_body.find_all('div', style="float:left")
+
+    defs = []
+    definition = []
+    html_str = []
+
+    for n in def_numbers:
+        defs.append(n.next_sibling)
+
+    # Checks for multiple definitions and
+    # adds list tags for proper html structure
+    if len(defs) > 1:
+        stripped = []
+
+        for i in defs:
+            text = i.get_text()
+            stripped.append(text)
+
+        # Removes extra whitespaces in the definition strings
+        for j in stripped:
+            definition.append(' '.join(j.split()))
+
+        html_str.append('【' + term + '】 ' + yomigana)
+
+        # Creates list out of definitions
+        html_str.append('<ol>')
+
+        for k in definition:
+            html_str.append('<li>' + k + '</li>')
+
+        html_str.append('</ol>')
+
+        # Converts html list to one whole string
+        # for pushing to the entries list
+        html_str = '\n'.join(html_str)
+        return html_str
+
+    # Checks for single definition and parses it in the html
+    else:
+        one_div = chosen_body.select_one("div div div").get_text()
+
+        definition = ' '.join(one_div.split())
+        html_str = '【' + term + '】 ' + yomigana + '<br />\n' + definition
+        return html_str
+
+
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.setWindowTitle('大辞林 definitions from weblio.jp')
+        self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
         self.resize(700, 500)
 
         vl = QVBoxLayout()
@@ -31,21 +129,20 @@ class MainWindow(QMainWindow):
         self.search_box.setFont(default_font)
         hl.addWidget(self.search_box)
 
-        self.search_btn = QPushButton('検索')
+        self.search_btn = QPushButton(u' 検索 \u23CE ')
         self.search_btn.setFont(default_font)
+        self.search_btn.clicked.connect(self.onSearch)
         hl.addWidget(self.search_btn)
 
-        self.add_btn = QPushButton('追加')
+        self.add_btn = QPushButton(u' 追加 ᴄᴛʀʟ+\u23CE ')
         self.add_btn.setFont(default_font)
         hl.addWidget(self.add_btn)
-
-        self.search_btn.clicked.connect(self.onSearch)
 
         output_font = QFont()
         output_font.setFamily('Meiryo')
         output_font.setPointSize(9)
 
-        self.output_box = QPlainTextEdit()
+        self.output_box = QTextEdit()
         self.output_box.setFont(output_font)
 
         vl.addLayout(hl)
@@ -76,71 +173,18 @@ class MainWindow(QMainWindow):
 
     def onSearch(self):
         term = self.search_box.text()
+        term = re.sub(r'\s', '', term)
+
         self.setWindowTitle('searching...')
-        self.output_box.appendPlainText(Daijirin().search(term))
+        result = Daijirin(term)
 
-
-class Daijirin:
-
-    def search(self, term):
-
-        text_file = open('definitions.txt', 'ab')
-
-        # Pushes complete entry into final output text file
-        def push_entry():
-            # checks if definitions.txt is empty or not
-            if os.stat("definitions.txt").st_size == 0:
-                text_file.write(html.encode('utf-8'))
-            else:
-                text_file.write(('\n\n<div>' + html +
-                                '</div>').encode('utf-8'))
-
-        # Creates an ASCII-friendly URL to query a webbrowser search
-        converted_term = urllib.parse.quote(term, safe='')
-        url = 'https://www.weblio.jp/content/' + converted_term
-
-        # Opens the url and extracts the source html usings bs4
-        sauce = urllib.request.urlopen(url)
-        soup = bs.BeautifulSoup(sauce, 'lxml')
-        daijirin = soup.find(
-            'a', href="https://www.weblio.jp/cat/dictionary/ssdjj"
-        )
-
-        # Function used to locate Daijirin section of the web page
-        def get_header():
-            try:
-                grabbed = daijirin.find_parent('div', class_='pbarT')
-                return grabbed
-            # TODO: figure out how to hide the AttributeError output
-            except AttributeError:
-                print("\nSorry! We couldn\'t find any 大辞林 definitions for " +
-                      "\'{0}\'.\nTry another term or check your input.\n"
-                      .format(term))
-
-        # Locates the header div that indicates the following definition
-        # is a Daijirin definition
-        daiji_header = get_header()
-        # Finds the following div containing the Daijirin definitions
-        entry = daiji_header.find_next_sibling('div', class_='kijiWrp')
-        # Outputs Daijirin header(s) to a list for the user to choose from
-        entry_head = entry.find_all('div', class_='NetDicHead')
-
-        entry_list = []
-        entry_list.extend(entry_head)
-
-        if len(entry_list) > 1:
-            chosen_head = EntrySelectDialog(entry_list)
-            print(chosen_head)
-            return chosen_head
-
-        elif len(entry_list) == 1:
-            chosen_head = entry_list[0]
-            print(chosen_head)
-            return chosen_head
+        if result is not False:
+            self.output_box.insertHtml(result)
+            print(self.output_box.toPlainText())
         else:
-            print('')
-            # NoneFound() Dialog
+            print('none found')
 
+        self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
 
 class EntrySelectDialog(QDialog):
     def __init__(self, choice_list):
@@ -151,12 +195,14 @@ class EntrySelectDialog(QDialog):
         self.resize(300, 300)
 
         self.listing = QListWidget()
-        self.setupList(self.choice_list)
+        for choice in choice_list:
+            c = choice.get_text()
+            self.listing.addItem(c)
 
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.setEntry)
-        self.buttonBox.rejected.connect(self.onRejected)
+        self.buttonBox.accepted.connect(self.onAccept)
+        self.buttonBox.rejected.connect(self.onReject)
 
         w = QWidget()
         vl = QVBoxLayout()
@@ -167,18 +213,16 @@ class EntrySelectDialog(QDialog):
         self.setLayout(vl)
 
         self.exec_()
+            
 
-    def setupList(self, choices):
-        for choice in choices:
-            c = choice.get_text()
-            self.listing.addItem(c)
+    def onAccept(self):
+        self.selection = self.listing.currentRow()
+        self.accept()
 
-    def setEntry(self):
-        print('ACCEPTED')
-        return 'yo yo'
-
-    def onRejected(self):
-        print('REJECTED')
+    def onReject(self):
+        self.selection = False
+        self.reject()
+    
 
 
 app = QApplication(sys.argv)
