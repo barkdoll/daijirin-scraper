@@ -1,5 +1,6 @@
-/daijiscrape
-deflist-stolen-from-pfpack-anki-addon.py
-*.pyc
 .editorconfig
 .vscode/
+__pycache__/
+deflist-stolen-from-pfpack-anki-addon.py
+*.pyc
+test.py
