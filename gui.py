@@ -198,6 +198,12 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
 
+    def onClose(self):
+        print('closed')
+    
+    def onAdd(self):
+        print('daijirin defs added')
+
 class EntrySelectDialog(QDialog):
     def __init__(self, choice_list):
         super().__init__()
