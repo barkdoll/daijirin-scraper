@@ -33,15 +33,19 @@ def Daijirin(term):
     def get_header():
         try:
             grabbed = daijirin.find_parent('div', class_='pbarT')
-            return grabbed
-        # TODO: figure out how to hide the AttributeError output
-        except AttributeError:
-            print('none found')
-            # NoneFound(QMessageBox)
+        except:
+            grabbed = None
+            pass            
+        
+        return grabbed
 
     # Locates the header div that indicates the following definition
     # is a Daijirin definition
     daiji_header = get_header()
+    
+    # Handles terms with no entries found
+    if daiji_header == None:
+        return None
 
     # Finds the following div containing the Daijirin definitions
     entry = daiji_header.find_next_sibling('div', class_='kijiWrp')
@@ -51,11 +55,12 @@ def Daijirin(term):
 
     if len(entry_heads) > 1:
         chosen_head = EntrySelectDialog(entry_heads).selection
+        if chosen_head == 'cancelled':
+            return 'cancelled'
     elif len(entry_heads) == 1:
         chosen_head = 0
     else:
-        # NoneFound() QMessageBox
-        print('none found')
+        return None
     
     
     chosen_body = entry_heads[chosen_head].find_next_sibling('div', class_='NetDicBody')
@@ -114,8 +119,9 @@ def Daijirin(term):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    # removed *args and **kwargs after 'self' from __init__ line below
+    def __init__(self):
+        super().__init__()
 
         self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
         self.resize(700, 500)
@@ -129,12 +135,12 @@ class MainWindow(QMainWindow):
         self.search_box.setFont(default_font)
         hl.addWidget(self.search_box)
 
-        self.search_btn = QPushButton(u' 検索 \u23CE ')
+        self.search_btn = QPushButton(u' 検索 (\u23CE) ')
         self.search_btn.setFont(default_font)
         self.search_btn.clicked.connect(self.onSearch)
         hl.addWidget(self.search_btn)
 
-        self.add_btn = QPushButton(u' 追加 ᴄᴛʀʟ+\u23CE ')
+        self.add_btn = QPushButton(u' 追加 (ᴄᴛʀʟ+\u23CE) ')
         self.add_btn.setFont(default_font)
         hl.addWidget(self.add_btn)
 
@@ -142,8 +148,9 @@ class MainWindow(QMainWindow):
         output_font.setFamily('Meiryo')
         output_font.setPointSize(9)
 
-        self.output_box = QTextEdit()
-        self.output_box.setFont(output_font)
+        self.output_box = QPlainTextEdit()
+        self.output_box.setFont(default_font)
+        # self.output_box.setFont(output_font)
 
         vl.addLayout(hl)
         vl.addWidget(self.output_box)
@@ -178,11 +185,16 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('searching...')
         result = Daijirin(term)
 
-        if result is not False:
-            self.output_box.insertHtml(result)
-            print(self.output_box.toPlainText())
-        else:
-            print('none found')
+        if result == 'cancelled':
+            pass
+        elif result == None:
+            NoneFound(term)
+        else:    
+            if self.output_box.toPlainText() == '':
+                self.output_box.appendPlainText(result)
+            else:
+                div_str = '\n<div>\n' + result + '\n</div>'
+                self.output_box.appendPlainText(div_str)     
 
         self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
 
@@ -194,7 +206,11 @@ class EntrySelectDialog(QDialog):
         self.setWindowTitle('Choose entry')
         self.resize(300, 300)
 
+        font = MainWindow().setupFont()
+        # self.setFont(font)
+
         self.listing = QListWidget()
+        self.listing.setFont(font)
         for choice in choice_list:
             c = choice.get_text()
             self.listing.addItem(c)
@@ -220,9 +236,33 @@ class EntrySelectDialog(QDialog):
         self.accept()
 
     def onReject(self):
-        self.selection = False
+        self.selection = 'cancelled'
         self.reject()
     
+    # overrides closing of MainWindow when clicking 
+    # the corner 'X' to close the selection dialog box
+    def closeEvent(self, event):
+        self.onReject()
+    
+
+class NoneFound(QMessageBox):
+    def __init__(self, search):
+        super().__init__()
+
+        self.search = search
+
+        font = MainWindow().setupFont()
+        self.setFont(font)
+
+        converted_term = urllib.parse.quote(self.search, safe='')
+        url = 'https://www.weblio.jp/content/' + converted_term
+
+        self.setIcon(QMessageBox.Information)
+        self.setText("No 大辞林 definitions found for " + self.search)
+        self.setInformativeText("<a href=\""+url+"\">Check weblio for other dictionary definitions.</a>")
+        self.setWindowTitle("No definitions found")
+
+        self.exec_()
 
 
 app = QApplication(sys.argv)
