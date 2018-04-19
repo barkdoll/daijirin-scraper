@@ -41,7 +41,6 @@ def Daijirin(term):
     # Locates the header div that indicates the following definition
     # is a Daijirin definition
     daiji_header = get_header()
-
     # Handles terms with no entries found
     if daiji_header is None:
         return None

@@ -72,17 +72,20 @@ def Daijirin(term):
             try:
                 grabbed = daijirin.find_parent('div', class_='pbarT')
                 return grabbed
-            # TODO: figure out how to hide the AttributeError output
+
             except AttributeError:
-                print(
-                    "\nSorry! We couldn\'t find any 大辞林 definitions for " +
-                    "\'{0}\'.\nTry another term or check your input.\n"
-                    .format(term)
-                )
+                pass
 
         # Locates the header div that indicates the following definition
         # is a Daijirin definition
         daiji_header = get_header()
+
+        if daiji_header is None:
+            print(
+                "\nNo 大辞林 definitions found for \'{0}\'.".format(term) +
+                "\nTry another term or check your input.\n"
+            )
+            return
 
         # Finds the following div containing the Daijirin definitions
         entry = daiji_header.find_next_sibling('div', class_='kijiWrp')
