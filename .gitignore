@@ -3,3 +3,5 @@ __pycache__/
 deflist-stolen-from-pfpack-anki-addon.py
 *.pyc
 test.py
+anki/
+env/
