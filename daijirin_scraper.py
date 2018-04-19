@@ -47,13 +47,13 @@ def Daijirin(term):
         text_file = open('definitions.txt', 'ab')
 
         # Pushes complete entry into final output text file
-        def push_entry():
+        def push_entry(txt):
             # checks if definitions.txt is empty or not
             if os.stat("definitions.txt").st_size == 0:
-                text_file.write(html.encode('utf-8'))
+                text_file.write(txt.encode('utf-8'))
             else:
                 text_file.write(
-                    ('\n\n<div>' + html + '</div>').encode('utf-8')
+                    ('\n\n<div>' + txt + '</div>').encode('utf-8')
                 )
 
         # Creates an ASCII-friendly URL to query a webbrowser search
@@ -168,7 +168,7 @@ def Daijirin(term):
             # Converts html list to one whole string
             # for pushing to the entries list
             html = '\n'.join(html)
-            push_entry()
+            push_entry(html)
 
         # Checks for single definition and parses it in the html
         else:
@@ -176,7 +176,7 @@ def Daijirin(term):
 
             definition = ' '.join(one_div.split())
             html = '【' + term + '】 ' + yomigana + '<br />\n' + definition
-            push_entry()
+            push_entry(html)
 
         # Shows successful output in console
         print('\n', html, '\n')
