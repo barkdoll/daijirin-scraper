@@ -203,6 +203,20 @@ class MainWindow(QMainWindow):
         self.search_box.setFocus()
         self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
 
+    def keyPressEvent(self, event):
+        mods = QApplication.keyboardModifiers()
+
+        # Listens for 'Enter' key binding
+        if (event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return):
+            self.onSearch()
+
+        # Listens for 'Ctrl+Enter' kb shortcut
+        if (event.key() == Qt.Key_Enter and mods == Qt.ControlModifier or
+            event.key() == Qt.Key_Return and mods == Qt.ControlModifier):
+
+            # Here you will put the logic to populate the anki field
+            self.close()
+
     def onClose(self):
         print('closed')
 
@@ -249,6 +263,12 @@ class EntrySelectDialog(QDialog):
     def onReject(self):
         self.selection = 'cancelled'
         self.reject()
+
+    def keyPressEvent(self, event):
+        cr = self.listing.currentRow()
+        # Listens for 'Enter' key binding
+        if (event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return):
+            self.onAccept()
 
     # overrides closing of MainWindow when clicking
     # the corner 'X' to close the selection dialog box
