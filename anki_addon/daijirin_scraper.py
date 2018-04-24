@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
 
+
 from aqt import mw, editor
 from aqt.utils import showInfo, tooltip
 from anki.hooks import addHook
 from aqt.qt import *
-# import utility
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+
 import bs4 as bs
 import urllib.request
 import urllib.parse
 import os
 import sys
 import re
-
-# for escaping html characters
-# import utility
 
 
 def Daijirin(term):
@@ -28,7 +26,7 @@ def Daijirin(term):
 
     # Opens the url and extracts the source html usings bs4
     sauce = urllib.request.urlopen(url)
-    soup = bs.BeautifulSoup(sauce, 'lxml')
+    soup = bs.BeautifulSoup(sauce, "html.parser")
     daijirin = soup.find(
         'a', href="https://www.weblio.jp/cat/dictionary/ssdjj"
     )
@@ -122,9 +120,8 @@ def Daijirin(term):
 
 
 class ScraperWindow(QMainWindow):
-    # removed *args and **kwargs after 'self' from __init__ line below
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent.widget)
 
         self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
         self.resize(700, 500)
@@ -163,6 +160,7 @@ class ScraperWindow(QMainWindow):
         self.setCentralWidget(widget)
 
         self.search_box.setFocus()
+        self.show()
 
     def setupFont(self):
         font = QFont()
@@ -237,7 +235,7 @@ class EntrySelectDialog(QDialog):
         self.setWindowTitle('Choose entry')
         self.resize(300, 300)
 
-        font = ScraperWindow().setupFont()
+        font = ScraperWindow.setupFont(self)
         # self.setFont(font)
 
         self.listing = QListWidget()
@@ -287,7 +285,7 @@ class NoneFound(QMessageBox):
 
         self.search = search
 
-        font = ScraperWindow().setupFont()
+        font = ScraperWindow.setupFont(self)
         self.setFont(font)
 
         converted_term = urllib.parse.quote(self.search, safe='')
@@ -304,13 +302,11 @@ class NoneFound(QMessageBox):
 
 def addMyButton(buttons, editor):
     editor._links['大辞林'] = ScraperWindow
+
     here = os.path.dirname(os.path.abspath(__file__))
-
+    # TODO: conditional block to determine os 
+    # and change slashes accordingly
     icon_path = here + "\\icons\\icon.png"
-
-    print('\n')
-    print(icon_path)
-    print('\n')
 
     buttons.insert(0, editor._addButton(
         icon_path, # "/full/path/to/icon.png",

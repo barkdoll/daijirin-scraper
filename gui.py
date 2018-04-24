@@ -215,13 +215,14 @@ class ScraperWindow(QMainWindow):
             event.key() == Qt.Key_Return and mods == Qt.ControlModifier):
 
             # Here you will put the logic to populate the anki field
-            self.close()
+            self.onAdd()
 
     def onClose(self):
         print('closed')
 
     def onAdd(self):
         print('daijirin defs added')
+        self.close()
 
 
 class EntrySelectDialog(QDialog):
