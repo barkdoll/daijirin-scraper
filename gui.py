@@ -116,7 +116,7 @@ def Daijirin(term):
         return html_str
 
 
-class MainWindow(QMainWindow):
+class ScraperWindow(QMainWindow):
     # removed *args and **kwargs after 'self' from __init__ line below
     def __init__(self):
         super().__init__()
@@ -232,7 +232,7 @@ class EntrySelectDialog(QDialog):
         self.setWindowTitle('Choose entry')
         self.resize(300, 300)
 
-        font = MainWindow().setupFont()
+        font = ScraperWindow().setupFont()
         # self.setFont(font)
 
         self.listing = QListWidget()
@@ -270,7 +270,7 @@ class EntrySelectDialog(QDialog):
         if (event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return):
             self.onAccept()
 
-    # overrides closing of MainWindow when clicking
+    # overrides closing of ScraperWindow when clicking
     # the corner 'X' to close the selection dialog box
     def closeEvent(self, event):
         self.onReject()
@@ -282,7 +282,7 @@ class NoneFound(QMessageBox):
 
         self.search = search
 
-        font = MainWindow().setupFont()
+        font = ScraperWindow().setupFont()
         self.setFont(font)
 
         converted_term = urllib.parse.quote(self.search, safe='')
@@ -298,7 +298,7 @@ class NoneFound(QMessageBox):
 
 
 app = QApplication(sys.argv)
-window = MainWindow()
+window = ScraperWindow()
 window.show()
 
 app.exec_()

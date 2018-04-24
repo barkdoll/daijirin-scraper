@@ -6,4 +6,4 @@ test.py
 anki/
 env/
 anki21env/
-*.code-workspaces
+*.code-workspace
