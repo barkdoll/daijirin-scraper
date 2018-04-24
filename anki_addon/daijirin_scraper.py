@@ -121,10 +121,10 @@ def Daijirin(term):
         return html_str
 
 
-class MainWindow(QDialog):
+class ScraperWindow(QMainWindow):
     # removed *args and **kwargs after 'self' from __init__ line below
     def __init__(self):
-        QDialog.__init__(self, parent=editor)
+        super().__init__()
 
         self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
         self.resize(700, 500)
@@ -237,7 +237,7 @@ class EntrySelectDialog(QDialog):
         self.setWindowTitle('Choose entry')
         self.resize(300, 300)
 
-        font = MainWindow().setupFont()
+        font = ScraperWindow().setupFont()
         # self.setFont(font)
 
         self.listing = QListWidget()
@@ -275,7 +275,7 @@ class EntrySelectDialog(QDialog):
         if (event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return):
             self.onAccept()
 
-    # overrides closing of MainWindow when clicking
+    # overrides closing of ScraperWindow when clicking
     # the corner 'X' to close the selection dialog box
     def closeEvent(self, event):
         self.onReject()
@@ -287,7 +287,7 @@ class NoneFound(QMessageBox):
 
         self.search = search
 
-        font = MainWindow().setupFont()
+        font = ScraperWindow().setupFont()
         self.setFont(font)
 
         converted_term = urllib.parse.quote(self.search, safe='')
@@ -302,11 +302,20 @@ class NoneFound(QMessageBox):
         self.exec_()
 
 
-def addMyButton(editor):
-    editor._links['大辞林'] = MainWindow
-    return buttons + [editor._addButton(
-        "iconname", # "/full/path/to/icon.png",
-        "大辞林", # link name
-        "Add definitions from 大辞林")]
+def addMyButton(buttons, editor):
+    editor._links['大辞林'] = ScraperWindow
+    here = os.path.dirname(os.path.abspath(__file__))
 
-addHook("editor.setupEditorButtons", addMyButton)
+    icon_path = here + "\\icons\\icon.png"
+
+    print('\n')
+    print(icon_path)
+    print('\n')
+
+    buttons.insert(0, editor._addButton(
+        icon_path, # "/full/path/to/icon.png",
+        "大辞林", # link name
+        "Add definitions from 大辞林"))
+    return buttons
+
+addHook("setupEditorButtons", addMyButton)
