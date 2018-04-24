@@ -2,7 +2,7 @@
 
 
 from aqt import mw, editor
-from aqt.utils import showInfo, tooltip
+from aqt.utils import showInfo, tooltip, isWin
 from anki.hooks import addHook
 from aqt.qt import *
 
@@ -16,6 +16,19 @@ import urllib.parse
 import os
 import sys
 import re
+
+
+# helper function to get icon path
+def iconPath():
+    here = os.path.dirname(os.path.abspath(__file__))
+    
+    if isWin:
+        slash = '\\'
+    else:
+        slash = '/'    
+    
+    icon_path = here + "{0}icons{0}icon.png".format(slash)
+    return icon_path
 
 
 def Daijirin(term):
@@ -123,6 +136,8 @@ class ScraperWindow(QMainWindow):
     def __init__(self, parent):
         super().__init__(parent.widget)
 
+
+        self.setWindowIcon(QIcon( iconPath() ))
         self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
         self.resize(700, 500)
 
@@ -233,6 +248,8 @@ class EntrySelectDialog(QDialog):
         self.choice_list = choice_list
 
         self.setWindowTitle('Choose entry')
+        self.setWindowIcon(QIcon( iconPath() ))        
+
         self.resize(300, 300)
 
         font = ScraperWindow.setupFont(self)
@@ -284,6 +301,7 @@ class NoneFound(QMessageBox):
         super().__init__()
 
         self.search = search
+        self.setWindowIcon(QIcon( iconPath() ))        
 
         font = ScraperWindow.setupFont(self)
         self.setFont(font)
@@ -303,13 +321,8 @@ class NoneFound(QMessageBox):
 def addMyButton(buttons, editor):
     editor._links['大辞林'] = ScraperWindow
 
-    here = os.path.dirname(os.path.abspath(__file__))
-    # TODO: conditional block to determine os 
-    # and change slashes accordingly
-    icon_path = here + "\\icons\\icon.png"
-
     buttons.insert(0, editor._addButton(
-        icon_path, # "/full/path/to/icon.png",
+        iconPath(), # "/full/path/to/icon.png",
         "大辞林", # link name
         "Add definitions from 大辞林"))
     return buttons
