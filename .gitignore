@@ -5,3 +5,5 @@ deflist-stolen-from-pfpack-anki-addon.py
 test.py
 anki/
 env/
+anki21env/
+*.code-workspaces
