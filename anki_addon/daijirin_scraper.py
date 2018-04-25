@@ -2,20 +2,20 @@
 
 from aqt import mw, editor
 from aqt.utils import showInfo, tooltip, isWin
+from anki.utils import json
 from anki.hooks import addHook
 from aqt.qt import *
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 import bs4 as bs
 import urllib.request
 import urllib.parse
 import os
 import sys
 import re
-
 
 # helper function to get icon path
 def iconPath():
@@ -131,10 +131,11 @@ def Daijirin(term):
         return html_str
 
 
-class ScraperWindow(QMainWindow):
+class ScraperWindow(QDialog):
     def __init__(self, parent):
         super().__init__(parent.widget)
 
+        self.web = parent.web
 
         self.setWindowIcon(QIcon( iconPath() ))
         self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
@@ -168,10 +169,7 @@ class ScraperWindow(QMainWindow):
 
         vl.addLayout(hl)
         vl.addWidget(self.output_box)
-
-        widget = QWidget()
-        widget.setLayout(vl)
-        self.setCentralWidget(widget)
+        self.setLayout(vl)
 
         self.search_box.setFocus()
         self.show()
@@ -224,23 +222,29 @@ class ScraperWindow(QMainWindow):
         mods = QApplication.keyboardModifiers()
 
         # Listens for 'Enter' key binding
-        if (event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return):
+        if (event.key() == Qt.Key_Enter or 
+            event.key() == Qt.Key_Return):
             self.onSearch()
 
         # Listens for 'Ctrl+Enter' kb shortcut
-        if (event.key() == Qt.Key_Enter and mods == Qt.ControlModifier or
-            event.key() == Qt.Key_Return and mods == Qt.ControlModifier):
+        if (event.key() == Qt.Key_Enter and 
+            mods == Qt.ControlModifier or
+            event.key() == Qt.Key_Return and 
+            mods == Qt.ControlModifier):
 
             # Here you will put the logic to populate the anki field
             self.onAdd()
 
     def onAdd(self):
-        self.addToField(self.output_box.toPlainText())
+        data = self.output_box.toPlainText()
+
+        # TODO: Figure out how document.execCmd is working
+        # Possible alternative: Line 395 / editor.py
+        # self.note.fields[field] = html
+        self.web.eval("document.execCommand('insertHTML', false, %s);" 
+            % json.dumps(data))
+
         self.close()
-    
-    # TODO: Fix this. It does not work and it is broken.
-    def addToField(self, txt_data):
-        editor.currentField.appendPlainText(txt_data)
 
 
 class EntrySelectDialog(QDialog):

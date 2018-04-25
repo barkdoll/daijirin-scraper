@@ -1,8 +1,10 @@
 .vscode/
 __pycache__/
-*.pyc
-test.py
 anki/
-env/
 anki21env/
+env/
 *.code-workspace
+*.pyc
+*.zip
+test.py
+meta.json
