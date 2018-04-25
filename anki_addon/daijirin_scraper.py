@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 from aqt import mw, editor
 from aqt.utils import showInfo, tooltip, isWin
 from anki.hooks import addHook
@@ -233,13 +232,15 @@ class ScraperWindow(QMainWindow):
             event.key() == Qt.Key_Return and mods == Qt.ControlModifier):
 
             # Here you will put the logic to populate the anki field
-            self.close()
-
-    def onClose(self):
-        print('closed')
+            self.onAdd()
 
     def onAdd(self):
-        print('daijirin defs added')
+        self.addToField(self.output_box.toPlainText())
+        self.close()
+    
+    # TODO: Fix this. It does not work and it is broken.
+    def addToField(self, txt_data):
+        editor.currentField.appendPlainText(txt_data)
 
 
 class EntrySelectDialog(QDialog):
@@ -326,5 +327,6 @@ def addMyButton(buttons, editor):
         "大辞林", # link name
         "Add definitions from 大辞林"))
     return buttons
+
 
 addHook("setupEditorButtons", addMyButton)
