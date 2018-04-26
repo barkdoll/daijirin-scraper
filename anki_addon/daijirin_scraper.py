@@ -155,7 +155,7 @@ class ScraperWindow(QDialog):
         self.search_btn.clicked.connect(self.onSearch)
         hl.addWidget(self.search_btn)
 
-        self.add_btn = QPushButton(u' 追加 (ᴄᴛʀʟ+\u23CE) ')
+        self.add_btn = QPushButton(u' 追加 (Ctrl+\u23CE) ')
         self.add_btn.setFont(default_font)
         self.add_btn.clicked.connect(self.onAdd)
         hl.addWidget(self.add_btn)
