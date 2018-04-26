@@ -1,14 +1,23 @@
 # Daijirin Scraper | 大辞林 スクレーパー
-## Purpose of this script
-To scrape dictionary definition data from [weblio.jp](http://www.weblio.jp/) for definitions from the all-wonderful 三省堂 大辞林 (Daijirin), a monolingual Japanese dictionary. It then parses the proper HTML to it for use with my proprietary Anki definition template. The template is included in the file **daijirin-scraper-example-card-layout.apkg**, which you can double click and import directly into Anki (desktop version).
+## Purpose of this addon
+To scrape dictionary definition data from [weblio.jp](http://www.weblio.jp/) for definitions from the all-wonderful 三省堂 大辞林 (Daijirin), a Japanese dictionary. It then parses the proper HTML to be injected into note fields. A template is included in the file **daijirin-scraper-example-card-layout.apkg**, which you can double click and import directly into Anki (desktop version).
+
+[**Click here to go to the shared addon page.**](https://ankiweb.net/shared/info/311119199)
 
 ## Goals for this project
-This is my first script written in Python. I would like to eventually create a GUI in PyQt so that it can be bundled and shipped directly into Anki as a shared add-on.[<sup>2</sup>](#2-current-todos)
+This is my first Python project. The goal was to learn more of the Anki codebase and automate a time-consuming process of adding definitions to cards.
 
-## Now
-Right now it can be ran through the Python 3 interpreter and scrape for a word passed in as an argument immediately following the script. Tested with Python 3.6.1
+### NOTE: this add-on currently supports single-level list definitions only
+It will not support multi-level nested definitions. At that point, I think you would be doing yourself a disservice listing out an entire definition on a flash card. Also, with Weblio's archaic HTML structure, the means by which creating something that could extract multi-level nests would not be an efficient effort, and I need to focus my time and energy on other things (like studying Japanese and building more tools to help people learn languages). If someone would like to implement this feature, I am open to contributions.
 
-## Instructions
+If you need to reference a word with a lengthy multi-nested list of definitions, I would suggest finding the one or two specific definitions and copy-pasting them from the website.
+
+## Standalone CLI version
+
+This project began as a command line script. The script adds the definitions to a text file which could be copied to clipboard and pasted into Anki.
+
+### Instructions for using the standalone version
+
 To run the script and add a definition to the **definitions.txt** file, go to the directory where the script is downloaded to and run the following command.
 
 **Git bash on Windows / Linux / Mac**
@@ -16,36 +25,44 @@ To run the script and add a definition to the **definitions.txt** file, go to th
 **NOTE:** _the Windows git bash terminal must be installed with the option to emulate inside of **cmd.exe**. The reason is the default git bash terminal that git will install gives you unicode charmap encoding errors when trying to execute the python script. I have included a screenshot and instructions below._[<sup>1</sup>](#1-windows-git-bash-required-installation-option)
 
 ```
-python.exe daijirin-scraper.py 言葉
+python.exe daijirin_scraper.py 言葉
 ```
 (言葉 can obviously be replaced with any term you would like to try)
 
-You can alternatively make a shell script (e.g. - `daijirin-scraper.sh`) as a shortcut for these commands, add it to a directory in your path, and run it like this:
+You can alternatively make an alias as a shortcut for running the script commands like this:
 ```
-daijirin-scraper.sh 言葉
+alias daijirin="python(.exe) daijirin_scraper.py" 
+```
+
+Then you could type
+```
+daijirin 言葉
+```
+instead of
+```
+python(.exe) daijirin_scraper.py 言葉
 ```
 
 If the entered term was found, it will be printed to the console along with the definitions and added to **definitions.txt**. If the term could not be found, an error will print stating that no terms matched. In some cases you might need to search for the term manually on [weblio.jp](http://www.weblio.jp/).
 
 You can view your stored definitions with:
 ```
-python.exe daijirin-scraper.py list
+daijirin list
 ```
 
 Once you have the desired defnitions in **definitions.txt**, you can run:
 ```
-python.exe daijirin-scraper.py cut
+daijirin cut
 ```
 
 This will cut the definitions from the text file into your clipboard so you can paste into your Anki card fields. After running this command, **definitions.txt** will be empty so that it is ready when you want to use it next.
 
 If you want to clear the **definitions.txt** file without copying them due to a mistake or otherwise, you can run:
 ```
-python.exe daijirin-scraper.py clear
+daijirin clear
 ```
 
-
-## Dependencies, required modules, etc.
+### Dependencies, required modules, etc.
 * Obviously, you will need Python installed (v3.6)
 * BeautfulSoup4
 * urllib.request
@@ -54,10 +71,6 @@ python.exe daijirin-scraper.py clear
 * os
 * pyperclip
 
-### NOTE: this add-on will only support single-level nested definitions.
-It will not support multi-level nested definitions. At that point, I think you would be doing yourself a disservice listing out an entire definition on a flash card. Also, with Weblio's terrible web architecture, the means by which creating something that could extract multi-level nests would not be an efficient effort, and I need to focus my time and energy on other things (like studying Japanese and building more tools to help people learn languages).
-
-If you need to reference a word with a lengthy multi-nested list of definitions, I would suggest finding the one or two specific definitions that describe the word's usage in the flash card's context, and copy-pasting those manually into your cards.
 
 ## Footnotes:
 
@@ -73,8 +86,3 @@ You will also need to change the git bash (cmd.exe) window's font to one that ha
 1. Open git bash.
 2. Right click on the title bar and click _Properties_.
 3. Select the font tab at the top of the menu and choose one from the list.
-
-### 2. Current TODOs:
-1. Add aqt GUI for Anki and add command that automatically fills the user's specified definition field.
-2. GUI should contain a dropdown menu to select the Anki note field where definitions will be injected.
-3. Create multiple-entry functionality for words with more than one pronunciation/entry using _find_all_. Allow user to select the desired entry from a generated list from the _find_all_ implementation.
