@@ -4,7 +4,6 @@ import os
 import sys
 import urllib.parse
 import urllib.request
-
 import bs4 as bs
 import pyperclip
 
@@ -62,7 +61,7 @@ def Daijirin(term):
 
         # Opens the url and extracts the source html usings bs4
         sauce = urllib.request.urlopen(url)
-        soup = bs.BeautifulSoup(sauce, 'lxml')
+        soup = bs.BeautifulSoup(sauce, 'html.parser')
         daijirin = soup.find(
             'a', href="https://www.weblio.jp/cat/dictionary/ssdjj"
         )
