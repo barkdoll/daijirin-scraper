@@ -71,18 +71,10 @@ daijirin clear
 * os
 * pyperclip
 
-
-## Footnotes:
-
-### 1. Windows git bash required installation option:
-
-![Alt text](readme/windows-option.png "Option needed for Windows git bash installation")
-
-This screen shows the correctly selected bullet option for using the cmd emulator to run git bash.
-
-You will also need to change the git bash (cmd.exe) window's font to one that has Japanese glyphs. MS Gothic / MS Mincho will work, but they're pretty ugly in the terminal. I use the OsakaMono font and it looks good.
-
-#### How to change the font:
-1. Open git bash.
-2. Right click on the title bar and click _Properties_.
-3. Select the font tab at the top of the menu and choose one from the list.
+### Working with Japanese text in your command line
+Your command line program will require a font with Japanese glyphs. I suggest OsakaMono.
+Also you will need to set your PYTHONIOENCODING variable to UTF-8 as well by running
+```
+export PYTHONIOENCODING=utf-8
+``` 
+Consult Google for help with changing your terminal font :)
