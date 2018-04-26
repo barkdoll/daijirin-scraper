@@ -14,33 +14,31 @@ If you need to reference a word with a lengthy multi-nested list of definitions,
 
 ## Standalone CLI version
 
-This project began as a command line script. The script adds the definitions to a text file which could be copied to clipboard and pasted into Anki.
+This project began as a command line script. The script adds the definitions to a text file (`definitions.txt`) which could be copied to clipboard and pasted into Anki.
 
 ### Instructions for using the standalone version
 
-To run the script and add a definition to the **definitions.txt** file, go to the directory where the script is downloaded to and run the following command.
-
-**Git bash on Windows / Linux / Mac**
-
-**NOTE:** _the Windows git bash terminal must be installed with the option to emulate inside of **cmd.exe**. The reason is the default git bash terminal that git will install gives you unicode charmap encoding errors when trying to execute the python script. I have included a screenshot and instructions below._[<sup>1</sup>](#1-windows-git-bash-required-installation-option)
+I suggest using Git Bash or some other bash terminal emulator on Windows.
+ 
+To run the script and add a definitions to the text file, run the following command.
 
 ```
-python.exe daijirin_scraper.py 言葉
+/path/to/python.exe /path/to/daijirin_scraper.py 言葉
 ```
 (言葉 can obviously be replaced with any term you would like to try)
 
-You can alternatively make an alias as a shortcut for running the script commands like this:
+You can alternatively make an alias as a shortcut for running the script like this:
 ```
-alias daijirin="python(.exe) daijirin_scraper.py" 
+alias daijirin="/path/to/python(.exe) /path/to/daijirin_scraper.py $1" 
 ```
 
-Then you could type
+Then you could just run it like this
 ```
 daijirin 言葉
 ```
-instead of
+instead of this
 ```
-python(.exe) daijirin_scraper.py 言葉
+/path/to/python(.exe) /path/to/daijirin_scraper.py 言葉
 ```
 
 If the entered term was found, it will be printed to the console along with the definitions and added to **definitions.txt**. If the term could not be found, an error will print stating that no terms matched. In some cases you might need to search for the term manually on [weblio.jp](http://www.weblio.jp/).
