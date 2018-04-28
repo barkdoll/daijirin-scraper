@@ -7,9 +7,9 @@ from anki.hooks import addHook
 from aqt.qt import *
 
 from PyQt5.QtGui import *
-
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+
 import bs4 as bs
 import urllib.request
 import urllib.parse
@@ -231,9 +231,10 @@ class ScraperWindow(QDialog):
             mods == Qt.ControlModifier or
             event.key() == Qt.Key_Return and 
             mods == Qt.ControlModifier):
-
-            # Here you will put the logic to populate the anki field
             self.onAdd()
+        
+        if (event.key() == Qt.Key_Escape):
+            self.close()
 
     def onAdd(self):
         data = self.output_box.toPlainText()
