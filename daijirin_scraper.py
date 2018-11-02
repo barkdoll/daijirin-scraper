@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 '''
 Addon: Daijirin Definition Scraper
-Copyright: (c) Jesse Barkdoll 2017-2018 <https://github.com/barkdoll>
+Copyright: (c) Jesse Barkdoll 2017-2019 <https://github.com/barkdoll>
 
 This addon was created to grab and parse definitions from the
 大辞林 (daijirin) dictionary hosted on <https://weblio.jp/>
+
 
 License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 '''
@@ -12,8 +13,9 @@ License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 import os
 import sys
 import urllib.parse
-import urllib.request
-import bs4 as bs
+import requests
+from bs4 import BeautifulSoup
+import re as Regex
 import pyperclip
 
 # Turn this off to see tracebacks for debugging
@@ -43,7 +45,7 @@ def Daijirin(term):
             read_file = open('definitions.txt', 'rb')
             print('\n', read_file.read().decode('utf-8'), '\n')
 
-    def search():
+    def search(term):
         # Normally, you would use 'a' as the second argument
         # in the open() method to open a file in append mode.
         # Append mode is the same as write mode,
@@ -69,20 +71,21 @@ def Daijirin(term):
         url = 'https://www.weblio.jp/content/' + converted_term
 
         # Opens the url and extracts the source html usings bs4
-        sauce = urllib.request.urlopen(url)
-        soup = bs.BeautifulSoup(sauce, 'html.parser')
+        sauce = requests.get(url).content
+        soup = BeautifulSoup(sauce, 'html.parser')
         daijirin = soup.find(
-            'a', href="https://www.weblio.jp/cat/dictionary/ssdjj"
+            'a', href=Regex.compile(".+ssdjj.*")
         )
 
         # Function used to locate Daijirin section of the web page
         def get_header():
             try:
                 grabbed = daijirin.find_parent('div', class_='pbarT')
-                return grabbed
-
-            except AttributeError:
+            except:
+                grabbed = None
                 pass
+
+            return grabbed
 
         # Locates the header div that indicates the following definition
         # is a Daijirin definition
@@ -90,16 +93,15 @@ def Daijirin(term):
 
         if daiji_header is None:
             print(
-                "\nNo 大辞林 definitions found for \'{0}\'.".format(term) +
+                "\nNo 大辞林 definitions found for '"+term+"'." +
                 "\nTry another term or check your input.\n"
             )
             return
 
         # Finds the following div containing the Daijirin definitions
         entry = daiji_header.find_next_sibling('div', class_='kijiWrp')
-
         # Outputs Daijirin header(s) to a list for the user to choose from
-        entry_head = entry.find_all('div', class_='NetDicHead')
+        entry_heads = entry.find_all('div', class_='NetDicHead')
 
         # Function that obtains user-chosen header for defnition output
         def choose_header(header_list):
@@ -112,7 +114,7 @@ def Daijirin(term):
                 )
 
                 for q, choices in enumerate(header_list, 1):
-                    text = choices.get_text().encode('utf-8')
+                    text = choices.text.encode('utf-8')
                     print(u'{0}. '.format(q) + text.decode('utf-8'))
 
                 # The extra space looks clean :)
@@ -133,59 +135,38 @@ def Daijirin(term):
             return chosen
 
         # Runs the above function to get the proper header
-        chosen_head = choose_header(entry_head)
+        chosen_head = choose_header(entry_heads)
         # Finds the body tag that contains definition(s)
         chosen_body = chosen_head.find_next_sibling('div', class_='NetDicBody')
         # Finds the yomigana for the word
-        yomigana = chosen_head.find('b').get_text()
+        yomigana = chosen_head.find('b').text
 
         # Omits repetitive yomigana if term is strictly in hiragana
         if yomigana == term:
             yomigana = ''
 
         # Takes multi-definition entries and generates a list for output
-        def_numbers = chosen_body.find_all('div', style="float:left")
-
-        defs = []
-        definition = []
-        html = []
-
-        for n in def_numbers:
-            defs.append(n.next_sibling)
+        defs = chosen_body.find_all('span', style="text-indent:0;")
 
         # Checks for multiple definitions and
         # adds list tags for proper html structure
         if len(defs) > 1:
-            stripped = []
-
-            for i in defs:
-                text = i.get_text()
-                stripped.append(text)
-
+            stripped = [d.text for d in defs]
             # Removes extra whitespaces in the definition strings
-            for j in stripped:
-                definition.append(' '.join(j.split()))
+            definition = ["".join(piece.split()) for piece in stripped]
 
-            html.append('【' + term + '】 ' + yomigana)
-
-            # Creates list out of definitions
-            html.append('<ol>')
-
-            for k in definition:
-                html.append('<li>' + k + '</li>')
-
-            html.append('</ol>')
-
-            # Converts html list to one whole string
-            # for pushing to the entries list
-            html = '\n'.join(html)
+            html = "\n".join(
+                [('【' + term + '】 ' + yomigana + '<ol>')] +
+                [('<li>' + d + '</li>') for d in definition] +
+                ['</ol>']
+            )
             push_entry(html)
 
         # Checks for single definition and parses it in the html
         else:
-            one_div = chosen_body.select_one("div div div").get_text()
+            single_def = chosen_body.select_one("div div div").text
 
-            definition = ' '.join(one_div.split())
+            definition = "".join(single_def.split())
             html = '【' + term + '】 ' + yomigana + '<br />\n' + definition
             push_entry(html)
 
@@ -199,9 +180,12 @@ def Daijirin(term):
     elif term == 'list':
         list_defs()
     else:
-        search()
+        search(term)
 
 
-# Call that bad boy...
-t = sys.argv[1]
-Daijirin(t)
+# Initialize!
+t = sys.argv[1:]
+if len(t) == 0:
+    raise ValueError('no terms given. I need a search term pal.')
+else:
+    [Daijirin(terms) for terms in t]

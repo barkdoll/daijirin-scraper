@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 Addon: Daijirin Definition Scraper
-Copyright: (c) Jesse Barkdoll 2017-2018 <https://github.com/barkdoll>
+Copyright: (c) Jesse Barkdoll 2017-2019 <https://github.com/barkdoll>
 
 This addon was created to grab and parse definitions from the
 大辞林 (daijirin) dictionary hosted on <https://weblio.jp/>
@@ -21,23 +21,26 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-import bs4 as bs
-import urllib.request
+from bs4 import BeautifulSoup
+import requests
 import urllib.parse
 import os
+import ssl
 import sys
-import re
+import re as Regex
 
-# helper function to get icon path
+
+# Helper function to get icon path
 def iconPath():
     here = os.path.dirname(os.path.abspath(__file__))
-    
+
+    # set proper OS path separator
     if isWin:
-        slash = '\\'
+        sep = '\\'
     else:
-        slash = '/'    
-    
-    icon_path = here + "{0}icons{0}icon.png".format(slash)
+        sep = '/'
+
+    icon_path = here + "{0}icons{0}icon.png".format(sep)
     return icon_path
 
 
@@ -47,11 +50,16 @@ def Daijirin(term):
     converted_term = urllib.parse.quote(term, safe='')
     url = 'https://www.weblio.jp/content/' + converted_term
 
+    # Create context for the request that does not concern itself with SSL
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
     # Opens the url and extracts the source html usings bs4
-    sauce = urllib.request.urlopen(url)
-    soup = bs.BeautifulSoup(sauce, "html.parser")
+    sauce = requests.get(url).content
+    soup = BeautifulSoup(sauce, "html.parser")
     daijirin = soup.find(
-        'a', href="https://www.weblio.jp/cat/dictionary/ssdjj"
+        'a', href=Regex.compile(".+ssdjj.*")
     )
 
     # Function used to locate Daijirin section of the web page
@@ -90,54 +98,33 @@ def Daijirin(term):
     )
 
     # Finds the yomigana for the word
-    yomigana = entry_heads[chosen_head].find('b').get_text()
+    yomigana = entry_heads[chosen_head].find('b').text
     # Omits repetitive yomigana if term is strictly in hiragana
     if yomigana == term:
         yomigana = ''
 
     # Takes multi-definition entries and generates a list for output
-    def_numbers = chosen_body.find_all('div', style="float:left")
-
-    defs = []
-    definition = []
-    html_str = []
-
-    for n in def_numbers:
-        defs.append(n.next_sibling)
+    defs = chosen_body.find_all('span', style="text-indent:0")
 
     # Checks for multiple definitions and
     # adds list tags for proper html structure
     if len(defs) > 1:
-        stripped = []
-
-        for i in defs:
-            text = i.get_text()
-            stripped.append(text)
-
+        stripped = [d.text for d in defs]
         # Removes extra whitespaces in the definition strings
-        for j in stripped:
-            definition.append(' '.join(j.split()))
+        definition = ["".join(piece.split()) for piece in stripped]
 
-        html_str.append('【' + term + '】 ' + yomigana)
-
-        # Creates list out of definitions
-        html_str.append('<ol>')
-
-        for k in definition:
-            html_str.append('<li>' + k + '</li>')
-
-        html_str.append('</ol>')
-
-        # Converts html list to one whole string
-        # for pushing to the entries list
-        html_str = '\n'.join(html_str)
+        html_str = "\n".join(
+            [('【' + term + '】 ' + yomigana + '<ol>')] +
+            [('<li>' + d + '</li>') for d in definition] +
+            ['</ol>']
+        )
         return html_str
 
     # Checks for single definition and parses it in the html
     else:
-        one_div = chosen_body.select_one("div div div").get_text()
+        single_def = chosen_body.select_one("div div div").text
 
-        definition = ' '.join(one_div.split())
+        definition = "".join(single_def.split())
         html_str = '【' + term + '】 ' + yomigana + '<br />\n' + definition
         return html_str
 
@@ -189,7 +176,6 @@ class ScraperWindow(QDialog):
         font = QFont()
         if sys.platform == "win32":
             font.setFamily("Meiryo")
-            pointSize = 11
         elif sys.platform == "darwin":
             try:
                 platform
@@ -197,10 +183,10 @@ class ScraperWindow(QDialog):
                 import platform
             if platform.mac_ver()[0].startswith("10.10"):
                 font.setFamily("Lucida Grande")
-            pointSize = 11
         elif sys.platform.startswith("linux"):
             font.setFamily("Luxi Sans")
 
+        pointSize = 11
         font.setPointSize(pointSize)
         return font
 
@@ -241,9 +227,9 @@ class ScraperWindow(QDialog):
         if (event.key() == Qt.Key_Enter and 
             mods == Qt.ControlModifier or
             event.key() == Qt.Key_Return and 
-            mods == Qt.ControlModifier):
+                mods == Qt.ControlModifier):
             self.onAdd()
-        
+
         if (event.key() == Qt.Key_Escape):
             self.close()
 
@@ -253,8 +239,10 @@ class ScraperWindow(QDialog):
         # TODO: Figure out how document.execCmd is working
         # Possible alternative: Line 395 / editor.py
         # self.note.fields[field] = html
-        self.web.eval("document.execCommand('insertHTML', false, %s);" 
-            % json.dumps(data))
+        self.web.eval(
+            "document.execCommand('insertHTML', false, %s);" 
+            % json.dumps(data)
+        )
 
         self.close()
 
@@ -275,7 +263,7 @@ class EntrySelectDialog(QDialog):
         self.listing = QListWidget()
         self.listing.setFont(font)
         for choice in choice_list:
-            c = choice.get_text()
+            c = choice.text
             self.listing.addItem(c)
 
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -339,8 +327,8 @@ def addMyButton(buttons, editor):
     editor._links['大辞林'] = ScraperWindow
 
     buttons.insert(0, editor._addButton(
-        iconPath(), # "/full/path/to/icon.png",
-        "大辞林", # link name
+        iconPath(),  # "/full/path/to/icon.png",
+        "大辞林",  # link name
         "Add definitions from 大辞林"))
     return buttons
 
