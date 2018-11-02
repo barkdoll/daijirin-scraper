@@ -104,7 +104,7 @@ def Daijirin(term):
         yomigana = ''
 
     # Takes multi-definition entries and generates a list for output
-    defs = chosen_body.find_all('span', style="text-indent:0")
+    defs = chosen_body.find_all('span', style="text-indent:0;")
 
     # Checks for multiple definitions and
     # adds list tags for proper html structure
@@ -192,7 +192,7 @@ class ScraperWindow(QDialog):
 
     def onSearch(self):
         term = self.search_box.text()
-        term = re.sub(r'\s', '', term)
+        term = Regex.sub(r'\s', '', term)
 
         if term is '':
             return
