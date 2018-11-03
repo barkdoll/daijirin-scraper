@@ -23,7 +23,6 @@ from PyQt5.QtCore import *
 
 from bs4 import BeautifulSoup
 import requests
-import urllib.parse
 import os
 import ssl
 import sys
@@ -47,8 +46,7 @@ def iconPath():
 def Daijirin(term):
 
     # Creates an ASCII-friendly URL to query a webbrowser search
-    converted_term = urllib.parse.quote(term, safe='')
-    url = 'https://www.weblio.jp/content/' + converted_term
+    url = 'https://www.weblio.jp/content/{}'.format(term)
 
     # Create context for the request that does not concern itself with SSL
     ctx = ssl.create_default_context()
@@ -59,7 +57,7 @@ def Daijirin(term):
     sauce = requests.get(url).content
     soup = BeautifulSoup(sauce, "html.parser")
     daijirin = soup.find(
-        'a', href=Regex.compile(".+ssdjj.*")
+        'a', href=Regex.compile(".+/cat/dictionary/ssdjj.*")
     )
 
     # Function used to locate Daijirin section of the web page
@@ -136,7 +134,8 @@ class ScraperWindow(QDialog):
         self.web = parent.web
 
         self.setWindowIcon(QIcon( iconPath() ))
-        self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
+        self.setWindowTitle(
+            'Search 大辞林 definitions (can do multi-word search separated by spaces)')
         self.resize(700, 500)
 
         vl = QVBoxLayout()
@@ -186,8 +185,7 @@ class ScraperWindow(QDialog):
         elif sys.platform.startswith("linux"):
             font.setFamily("Luxi Sans")
 
-        pointSize = 11
-        font.setPointSize(pointSize)
+        font.setPointSize(11)
         return font
 
     def onSearch(self):
@@ -202,11 +200,11 @@ class ScraperWindow(QDialog):
         
         results = [Daijirin(term) for term in words]
 
-        for result in results:
+        for i, result in enumerate(results):
             if result == 'cancelled':
                 pass
             elif result is None:
-                NoneFound(result)
+                NoneFound(words[i])
             else:
                 if self.output_box.toPlainText() == '':
                     self.output_box.appendPlainText(result)
@@ -216,7 +214,8 @@ class ScraperWindow(QDialog):
 
         self.search_box.setText('')
         self.search_box.setFocus()
-        self.setWindowTitle('Search 大辞林 definitions (can do multi-word search with spaces)')
+        self.setWindowTitle(
+            'Search 大辞林 definitions (can do multi-word search separated by spaces)')
 
     def keyPressEvent(self, event):
         mods = QApplication.keyboardModifiers()
@@ -308,19 +307,18 @@ class NoneFound(QMessageBox):
     def __init__(self, search):
         super().__init__()
 
-        self.search = search
-        self.setWindowIcon(QIcon( iconPath() ))        
-
+        self.setWindowIcon(QIcon( iconPath() ))
         font = ScraperWindow.setupFont(self)
         self.setFont(font)
 
-        converted_term = urllib.parse.quote(self.search, safe='')
-        url = 'https://www.weblio.jp/content/' + converted_term
+        url = 'https://www.weblio.jp/content/{}'.format(search)
 
         self.setIcon(QMessageBox.Information)
-        self.setText("No 大辞林 definitions found for " + self.search)
-        self.setInformativeText("<a href=\""+url+"\">Check weblio results " +
-                                "for other dictionary definitions.</a>")
+        self.setText("No 大辞林 definitions found for " + search)
+        self.setInformativeText(
+            "<a href=\""+url+"\">Check weblio results " +
+            "for other dictionary definitions.</a>"
+        )
         self.setWindowTitle("None found")
 
         self.exec_()
@@ -329,10 +327,14 @@ class NoneFound(QMessageBox):
 def addMyButton(buttons, editor):
     editor._links['大辞林'] = ScraperWindow
 
-    buttons.insert(0, editor._addButton(
-        iconPath(),  # "/full/path/to/icon.png",
-        "大辞林",  # link name
-        "Add definitions from 大辞林"))
+    buttons.insert(
+        0, 
+        editor._addButton(
+            iconPath(),  # "/full/path/to/icon.png",
+            "大辞林",  # link name
+            "Add definitions from 大辞林"
+        )
+    )
     return buttons
 
 

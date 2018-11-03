@@ -12,7 +12,6 @@ License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 
 import os
 import sys
-import urllib.parse
 import requests
 from bs4 import BeautifulSoup
 import re as Regex
@@ -66,15 +65,13 @@ def Daijirin(term):
                     ('\n\n<div>' + txt + '</div>').encode('utf-8')
                 )
 
-        # Creates an ASCII-friendly URL to query a webbrowser search
-        converted_term = urllib.parse.quote(term, safe='')
-        url = 'https://www.weblio.jp/content/' + converted_term
+        url = 'https://www.weblio.jp/content/{}'.format(term)
 
         # Opens the url and extracts the source html usings bs4
         sauce = requests.get(url).content
         soup = BeautifulSoup(sauce, 'html.parser')
         daijirin = soup.find(
-            'a', href=Regex.compile(".+ssdjj.*")
+            'a', href=Regex.compile(".+/cat/dictionary/ssdjj.*")
         )
 
         # Function used to locate Daijirin section of the web page
