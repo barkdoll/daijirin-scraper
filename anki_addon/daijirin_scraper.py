@@ -191,29 +191,32 @@ class ScraperWindow(QDialog):
         return font
 
     def onSearch(self):
-        term = self.search_box.text()
-        term = Regex.sub(r'\s', '', term)
+        query = self.search_box.text()
 
-        if term is '':
+        if query is '':
             return
+        else:
+            words = query.split()
 
         self.setWindowTitle('Searching...')
-        result = Daijirin(term)
+        
+        results = [Daijirin(term) for term in words]
 
-        if result == 'cancelled':
-            pass
-        elif result is None:
-            NoneFound(term)
-        else:
-            if self.output_box.toPlainText() == '':
-                self.output_box.appendPlainText(result)
+        for result in results:
+            if result == 'cancelled':
+                pass
+            elif result is None:
+                NoneFound(result)
             else:
-                div_str = '\n<div>\n' + result + '\n</div>'
-                self.output_box.appendPlainText(div_str)
+                if self.output_box.toPlainText() == '':
+                    self.output_box.appendPlainText(result)
+                else:
+                    div_str = '\n<div>\n' + result + '\n</div>'
+                    self.output_box.appendPlainText(div_str)
 
         self.search_box.setText('')
         self.search_box.setFocus()
-        self.setWindowTitle('Search 大辞林 definitions from weblio.jp')
+        self.setWindowTitle('Search 大辞林 definitions (can do multi-word search with spaces)')
 
     def keyPressEvent(self, event):
         mods = QApplication.keyboardModifiers()
