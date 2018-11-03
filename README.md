@@ -2,8 +2,6 @@
 ## Purpose of this addon
 To scrape dictionary definition data from [weblio.jp](http://www.weblio.jp/) for definitions from the all-wonderful 三省堂 大辞林 (Daijirin), a Japanese dictionary. It then parses the proper HTML to be injected into note fields. A template is included in the file **daijirin-scraper-example-card-layout.apkg**, which you can double click and import directly into Anki (desktop version).
 
-[**Click here to go to the shared addon page.**](https://ankiweb.net/shared/info/311119199)
-
 ## Goals for this project
 This is my first Python project. The goal was to learn more of the Anki codebase and automate a time-consuming process of adding definitions to cards.
 
@@ -12,11 +10,31 @@ It will not support multi-level nested definitions. At that point, I think you w
 
 If you need to reference a word with a lengthy multi-nested list of definitions, I would suggest finding the one or two specific definitions and copy-pasting them from the website.
 
+
+## Anki Addon version
+
+[Click here to go to the shared addon page.](https://ankiweb.net/shared/info/311119199)
+
+### Usage
+* With the Anki main window open, go to **`Tools` > `Addons`** or type **`Ctrl + Shift + A`**
+* Click on the **`Get Add-ons...`** button
+* Copy and paste the following code into your Anki addons dialog: <span style="font-size:1.25em">**`311119199`**</span>
+* Click **`Ok`**, wait for _Daijirin Dictionary Scraper_ to appear on the addons list, close the window and restart Anki.
+* At the main window click **Add** or type `A` to open an editor dialogue. You will see a small green book button in the top right row of editor icons. Click it to begin using.
+
 ## Standalone CLI version
 
 This project began as a command line script. The script adds the definitions to a text file (`definitions.txt`) which could be copied to clipboard and pasted into Anki.
 
-### Instructions for using the standalone version
+### Dependencies, required modules, etc.
+* Python v3.6+
+* bs4 (Beautiful Soup v4)
+* requests
+* sys
+* os
+* pyperclip
+
+### Usage
 
 I suggest using Git Bash or some other bash terminal emulator on Windows.
  
@@ -60,19 +78,20 @@ If you want to clear the **definitions.txt** file without copying them due to a 
 daijirin clear
 ```
 
-### Dependencies, required modules, etc.
-* Obviously, you will need Python installed (v3.6)
-* BeautfulSoup4
-* urllib.request
-* urllib.parse
-* sys
-* os
-* pyperclip
-
-### Working with Japanese text in your command line
+### Handling Japanese text on the command line
 Your command line program will require a font with Japanese glyphs. I suggest OsakaMono.
 Also you will need to set your PYTHONIOENCODING variable to UTF-8 as well by running
 ```
 export PYTHONIOENCODING=utf-8
 ``` 
+
+If you are using [Hyper](https://github.com/zeit/hyper), you will need the following inside your preferences file (.hyper.js):
+```
+env: {
+      LANG: 'en_US.UTF-8'
+},
+```
+
+You may obviously have other properties alongside `LANG` inside of `env`, but `LANG` is needed for this application.
+
 Consult Google for help with changing your terminal font :)
