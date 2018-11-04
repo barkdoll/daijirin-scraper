@@ -52,7 +52,7 @@ class Scraper:
         # Encodes the bytes to utf-8 and copies text to clipboard
         pyperclip.copy(copy_file.decode('utf-8'))
         # Clears the contents of the file
-        clear()
+        self.clear()
 
     # Outputs definitions.txt to the console
     def list_defs(self):
@@ -83,11 +83,12 @@ class Scraper:
                     ('\n\n<div>' + txt + '</div>').encode('utf-8')
                 )
 
+        # Fetch initial page source
         url = 'https://www.weblio.jp/content/{}'.format(self.term)
-
-        # Opens the url and extracts the source html usings bs4
         sauce = requests.get(url).content
         soup = BeautifulSoup(sauce, 'html.parser')
+
+        # Find the header of selected dictionary
         header_url = soup.find(
             'a', href=Regex.compile(
                 ".+/cat/dictionary/{}.*".format(self.url_id)
@@ -206,7 +207,7 @@ class Scraper:
 
         # Omits repetitive yomigana if term is strictly in hiragana
         if definition['yomigana'] == self.term:
-            yomigana = ''
+            definition['yomigana'] = ''
 
         html = '【{0}】 {1}{2}'.format(
             self.term, definition['yomigana'], definition['body']
