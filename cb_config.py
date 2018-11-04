@@ -5,15 +5,12 @@ jisho_config = {
         'url_id': 'ssdjj',
         'header_class': 'pbarT',
         'body_class': 'NetDicBody',
-        'parse_action': 'parse_daijirin_def'
     },
 
     'wikipedia': {
         'name': 'ウィキペディア',
         'url_id': 'wkpja',
         'header_class': 'Wkpja',
-        'body_class': '',
-        'parse_action': 'parse_wiki_def'
     },
 
 }

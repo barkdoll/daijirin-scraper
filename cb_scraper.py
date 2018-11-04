@@ -17,10 +17,9 @@ from bs4 import BeautifulSoup
 import re as Regex
 import pyperclip
 from cb_config import jisho_config
-# from cb_config import kana
 
-# Turn this off to see tracebacks for debugging
-sys.tracebacklimit = None
+# Comment this out to see tracebacks for debugging
+# sys.tracebacklimit = None
 
 
 class Scraper:
@@ -29,7 +28,6 @@ class Scraper:
         self.jisho = jisho
         self.jisho_name = jisho_config[self.jisho]['name']
         self.url_id = jisho_config[self.jisho]['url_id']
-        self.parse_action = jisho_config[self.jisho]['parse_action']
 
         if self.term == 'clear':
             self.clear()
@@ -63,14 +61,6 @@ class Scraper:
             print('\n', read_file.read().decode('utf-8'), '\n')
 
     def scrape(self):
-        # Normally, you would use 'a' as the second argument
-        # in the open() method to open a file in append mode.
-        # Append mode is the same as write mode,
-        # but does not overwrite original file contents).
-        # But since the final output needs to be unicode,
-        # you have to encode it into UTF-8 bytes instead of a string.
-        # Therefore, you have to use 'ab' as the second arg,
-        # which I think means append binary.
         text_file = open('definitions.txt', 'ab')
 
         # Pushes complete entry into final output text file
@@ -110,7 +100,7 @@ class Scraper:
         if header is None:
             print(
                 "\nNo " + self.jisho_name + " definitions found for '" +
-                self.term + "'.\nTry another term or check your input.\n"
+                self.term + "'.\nCheck your input or try another dictionary.\n"
             )
             return
 
@@ -203,7 +193,13 @@ class Scraper:
 
             return data
 
-        definition = eval(self.parse_action)()
+        def parse_action(dictionary):
+            return {
+                'daijirin': parse_daijirin_def,
+                'wikipedia': parse_wiki_def
+            }[dictionary]()
+
+        definition = parse_action(self.jisho)
 
         # Omits repetitive yomigana if term is strictly in hiragana
         if definition['yomigana'] == self.term:
@@ -223,12 +219,8 @@ args = sys.argv[1:]
 if len(args) == 0:
     raise ValueError('no terms given. I need a search term pal.')
 else:
-    try:
-        if any("--wiki" in a for a in args):
-            args = [term for term in args if term != "--wiki"]
-            [Scraper(terms, 'wikipedia') for terms in args]
-        else:
-            [Scraper(terms) for terms in args]
-    except:
-        import traceback
-        print(traceback.format_exc())
+    if any("--wiki" in a for a in args):
+        args = [term for term in args if term != "--wiki"]
+        [Scraper(terms, 'wikipedia') for terms in args]
+    else:
+        [Scraper(terms) for terms in args]
