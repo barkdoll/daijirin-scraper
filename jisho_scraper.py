@@ -28,19 +28,19 @@ class Scraper:
         self.jisho = jisho
         self.jisho_name = jisho_config[self.jisho]['name']
         self.url_id = jisho_config[self.jisho]['url_id']
-        self.scrape()
+        self.data = self.scrape()
 
     def scrape(self):
         # Fetch initial page source
-        url = 'https://www.weblio.jp/content/{}'.format(self.term)
+        url = 'https://www.weblio.jp/content/{0}?dictCode={1}'.format(
+            self.term, self.url_id.upper() )
+        print('searching at ' + url)
         sauce = requests.get(url).content
         soup = BeautifulSoup(sauce, 'html.parser')
 
         # Find the header of selected dictionary
-        header_url = soup.find(
-            'a', href=re.compile(
-                ".+/cat/dictionary/{}.*".format(self.url_id)
-                )
+        header_url = soup.find('a', href=re.compile(
+            ".+/cat/dictionary/{}.*".format(self.url_id))
         )
 
         try:
@@ -61,9 +61,7 @@ class Scraper:
             data = {}
 
             entry_heads = entry.find_all('div', class_='NetDicHead')
-            # Finds the yomigana for the word
-
-            # Function that obtains user-chosen header for defnition output
+            
             def choose_header(header_list):
                 if len(header_list) > 1:
                     # If there is more than one entry head,
@@ -207,7 +205,7 @@ else:
 
         accumulator = []
         for term in args:
-            item = Scraper(term, call_jisho).scrape()
+            item = Scraper(term, call_jisho).data
             if item:
                 write_txt_file(item)
                 accumulator.append(item)

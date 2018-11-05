@@ -49,10 +49,12 @@ class Scraper:
         self.jisho = jisho
         self.jisho_name = jisho_config[self.jisho]['name']
         self.url_id = jisho_config[self.jisho]['url_id']
+        self.data = self.scrape()
 
     def scrape(self):
         # Fetch initial page source
-        url = 'https://www.weblio.jp/content/{}'.format(self.term)
+        url = 'https://www.weblio.jp/content/{0}?dictCode={1}'.format(
+            self.term, self.url_id.upper() )
         sauce = requests.get(url).content
         soup = BeautifulSoup(sauce, "html.parser")
 
@@ -238,7 +240,7 @@ class ScraperWindow(QDialog):
 
         self.setWindowTitle('Searching...')
 
-        results = [Scraper(term, self.jisho).scrape() for term in words]
+        results = [Scraper(term, self.jisho).data for term in words]
 
         for i, result in enumerate(results):
             if result == 'cancelled':
