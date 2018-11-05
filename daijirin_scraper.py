@@ -14,7 +14,7 @@ import os
 import sys
 import requests
 from bs4 import BeautifulSoup
-import re as Regex
+import re
 import pyperclip
 
 # Turn this off to see tracebacks for debugging
@@ -71,7 +71,7 @@ def Daijirin(term):
         sauce = requests.get(url).content
         soup = BeautifulSoup(sauce, 'html.parser')
         daijirin = soup.find(
-            'a', href=Regex.compile(".+/cat/dictionary/ssdjj.*")
+            'a', href=re.compile(".+/cat/dictionary/ssdjj.*")
         )
 
         # Function used to locate Daijirin section of the web page

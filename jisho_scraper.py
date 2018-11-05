@@ -14,9 +14,9 @@ import os
 import sys
 import requests
 from bs4 import BeautifulSoup
-import re as Regex
+import re
 import pyperclip
-from cb_config import jisho_config
+from jisho_config import jisho_config
 
 # Comment this out to see tracebacks for debugging
 # sys.tracebacklimit = None
@@ -28,51 +28,9 @@ class Scraper:
         self.jisho = jisho
         self.jisho_name = jisho_config[self.jisho]['name']
         self.url_id = jisho_config[self.jisho]['url_id']
-
-        if self.term == 'clear':
-            self.clear()
-        elif self.term == 'cut':
-            self.cut()
-        elif self.term == 'list':
-            self.list_defs()
-        else:
-            self.scrape()
-
-    # Clears the text file if the 'clear' argument is passed
-    def clear(self):
-        clear_file = open('definitions.txt', 'w')
-        clear_file.write('')
-
-    # Cuts all definitions in file to clipboard for pasting in Anki
-    def cut(self):
-        # Reads the file as bytes ('r+b')
-        copy_file = open('definitions.txt', 'r+b').read()
-        # Encodes the bytes to utf-8 and copies text to clipboard
-        pyperclip.copy(copy_file.decode('utf-8'))
-        # Clears the contents of the file
-        self.clear()
-
-    # Outputs definitions.txt to the console
-    def list_defs(self):
-        if os.stat("definitions.txt").st_size == 0:
-            print("\nThere's no definitions to show!\n")
-        else:
-            read_file = open('definitions.txt', 'rb')
-            print('\n', read_file.read().decode('utf-8'), '\n')
+        self.scrape()
 
     def scrape(self):
-        text_file = open('definitions.txt', 'ab')
-
-        # Pushes complete entry into final output text file
-        def push_entry(txt):
-            # checks if definitions.txt is empty or not
-            if os.stat("definitions.txt").st_size == 0:
-                text_file.write(txt.encode('utf-8'))
-            else:
-                text_file.write(
-                    ('\n\n<div>' + txt + '</div>').encode('utf-8')
-                )
-
         # Fetch initial page source
         url = 'https://www.weblio.jp/content/{}'.format(self.term)
         sauce = requests.get(url).content
@@ -80,29 +38,19 @@ class Scraper:
 
         # Find the header of selected dictionary
         header_url = soup.find(
-            'a', href=Regex.compile(
+            'a', href=re.compile(
                 ".+/cat/dictionary/{}.*".format(self.url_id)
                 )
         )
 
-        # Function used to locate selected dicitonary's entry section
-        def get_header():
-            try:
-                grabbed = header_url.find_parent('div', class_='pbarT')
-            except:
-                grabbed = None
-                pass
-
-            return grabbed
-
-        header = get_header()
+        try:
+            header = header_url.find_parent('div', class_='pbarT')
+        except:
+            header = None
+            pass
 
         if header is None:
-            print(
-                "\nNo " + self.jisho_name + " definitions found for '" +
-                self.term + "'.\nCheck your input or try another dictionary.\n"
-            )
-            return
+            return None
 
         # Finds the following element containing
         # the chosen dictionary's definitions
@@ -156,6 +104,9 @@ class Scraper:
             defs = chosen_body.find_all('span', style="text-indent:0;")
 
             data['yomigana'] = chosen_head.find('b').text
+            # Omits repetitive yomigana if term is strictly in hiragana
+            if data['yomigana'] == self.term:
+                data['yomigana'] = ''
 
             # Handle multiple definitions and parse html list
             if len(defs) > 1:
@@ -185,11 +136,8 @@ class Scraper:
                 .find('p', class_=None)\
                 .text
 
-            data['yomigana'] = Regex.sub(
-                r'.+（(.+)）と?は、?.+', '\g<1>', chosen_body)
-
-            data['body'] = '<br>\n' + Regex.sub(
-                r'.+）と?は、?(.+)', r'\1', chosen_body)
+            data['yomigana'] = ''
+            data['body'] = '<br>\n' + chosen_body
 
             return data
 
@@ -201,26 +149,73 @@ class Scraper:
 
         definition = parse_action(self.jisho)
 
-        # Omits repetitive yomigana if term is strictly in hiragana
-        if definition['yomigana'] == self.term:
-            definition['yomigana'] = ''
-
         html = '【{0}】 {1}{2}'.format(
             self.term, definition['yomigana'], definition['body']
         )
+        return html
 
-        push_entry(html)
-        # Shows successful output in console
-        print('\n', html, '\n')
+
+# Pushes complete entry into final output text file
+def write_txt_file(txt):
+    text_file = open('definitions.txt', 'ab')
+    # checks if definitions.txt is empty or not
+    if os.stat("definitions.txt").st_size == 0:
+        text_file.write(txt.encode('utf-8'))
+    else:
+        text_file.write(
+            ('\n\n<div>' + txt + '</div>').encode('utf-8')
+        )
+
+
+# Clears the text file if the 'clear' argument is passed
+def clear():
+    clear_file = open('definitions.txt', 'w')
+    clear_file.write('')
 
 
 # Initialize!
 args = sys.argv[1:]
+
 if len(args) == 0:
     raise ValueError('no terms given. I need a search term pal.')
+
 else:
-    if any("--wiki" in a for a in args):
-        args = [term for term in args if term != "--wiki"]
-        [Scraper(terms, 'wikipedia') for terms in args]
+    if any("list" in a for a in args):
+        if os.stat("definitions.txt").st_size == 0:
+            print("\nThere's no definitions to show!\n")
+        else:
+            read_file = open('definitions.txt', 'rb')
+            print('\n', read_file.read().decode('utf-8'), '\n')
+
+    elif any("cut" in a for a in args):
+        # Reads the file as bytes ('r+b')
+        copy_file = open('definitions.txt', 'r+b').read()
+        # Encodes the bytes to utf-8 and copies text to clipboard
+        pyperclip.copy(copy_file.decode('utf-8'))
+        # Clears the contents of the file
+        clear()
+
+    elif any("clear" in a for a in args):
+        clear()
+
     else:
-        [Scraper(terms) for terms in args]
+        call_jisho = 'daijirin'
+
+        if any("--wiki" in a for a in args):
+            call_jisho = 'wikipedia'
+            args = [a for a in args if a != "--wiki"]
+
+        accumulator = []
+        for term in args:
+            item = Scraper(term, call_jisho).scrape()
+            if item:
+                write_txt_file(item)
+                accumulator.append(item)
+            else:
+                print(
+                    "\nNo " + jisho_config[call_jisho]['name'] +
+                    " definitions found for '" + term +
+                    "'.\nCheck your input or try another dictionary.\n"
+                )
+
+        print('\n' + '\n\n'.join(accumulator) + '\n')

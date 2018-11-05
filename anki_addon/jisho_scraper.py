@@ -24,9 +24,9 @@ from PyQt5.QtCore import *
 from bs4 import BeautifulSoup
 import requests
 import os
-import ssl
 import sys
-import re as Regex
+import re
+from .jisho_config import jisho_config
 
 
 # Helper function to get icon path
@@ -43,88 +43,105 @@ def iconPath():
     return icon_path
 
 
-def Daijirin(term):
+class Scraper:
+    def __init__(self, term, jisho='daijirin'):
+        self.term = term
+        self.jisho = jisho
+        self.jisho_name = jisho_config[self.jisho]['name']
+        self.url_id = jisho_config[self.jisho]['url_id']
 
-    # Creates an ASCII-friendly URL to query a webbrowser search
-    url = 'https://www.weblio.jp/content/{}'.format(term)
+    def scrape(self):
+        # Fetch initial page source
+        url = 'https://www.weblio.jp/content/{}'.format(self.term)
+        sauce = requests.get(url).content
+        soup = BeautifulSoup(sauce, "html.parser")
 
-    # Create context for the request that does not concern itself with SSL
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
+        # Find the header of selected dictionary
+        header_url = soup.find('a', href=re.compile(
+            ".+/cat/dictionary/{}.*".format(self.url_id))
+        )
 
-    # Opens the url and extracts the source html usings bs4
-    sauce = requests.get(url).content
-    soup = BeautifulSoup(sauce, "html.parser")
-    daijirin = soup.find(
-        'a', href=Regex.compile(".+/cat/dictionary/ssdjj.*")
-    )
-
-    # Function used to locate Daijirin section of the web page
-    def get_header():
         try:
-            grabbed = daijirin.find_parent('div', class_='pbarT')
+            header = header_url.find_parent('div', class_='pbarT')
         except:
-            grabbed = None
+            header = None
             pass
 
-        return grabbed
+        if header is None:
+            return None
 
-    # Locates the header div that indicates the following definition
-    # is a Daijirin definition
-    daiji_header = get_header()
-    # Handles terms with no entries found
-    if daiji_header is None:
-        return None
+        # Find the header of selected dictionary
+        entry = header.find_next_sibling('div', class_='kijiWrp')
 
-    # Finds the following div containing the Daijirin definitions
-    entry = daiji_header.find_next_sibling('div', class_='kijiWrp')
-    # Outputs Daijirin header(s) to a list for the user to choose from
-    entry_heads = entry.find_all('div', class_='NetDicHead')
+        # Outputs Daijirin header(s) to a list for the user to choose from
+        def parse_daijirin_def():
+            data = {}
 
-    if len(entry_heads) > 1:
-        chosen_head = EntrySelectDialog(entry_heads).selection
-        if chosen_head == 'cancelled':
-            return 'cancelled'
-    elif len(entry_heads) == 1:
-        chosen_head = 0
-    else:
-        return None
+            entry_heads = entry.find_all('div', class_='NetDicHead')
 
-    chosen_body = (
-        entry_heads[chosen_head].find_next_sibling('div', class_='NetDicBody')
-    )
+            if len(entry_heads) > 1:
+                chosen_head = EntrySelectDialog(entry_heads).selection
+                if chosen_head == 'cancelled':
+                    return 'cancelled'
+            elif len(entry_heads) == 1:
+                chosen_head = 0
+            else:
+                return None
 
-    # Finds the yomigana for the word
-    yomigana = entry_heads[chosen_head].find('b').text
-    # Omits repetitive yomigana if term is strictly in hiragana
-    if yomigana == term:
-        yomigana = ''
+            chosen_body = entry_heads[chosen_head].find_next_sibling(
+                'div', class_='NetDicBody')
 
-    # Takes multi-definition entries and generates a list for output
-    defs = chosen_body.find_all('span', style="text-indent:0;")
+            data['yomigana'] = entry_heads[chosen_head].find('b').text
 
-    # Checks for multiple definitions and
-    # adds list tags for proper html structure
-    if len(defs) > 1:
-        stripped = [d.text for d in defs]
-        # Removes extra whitespaces in the definition strings
-        definition = ["".join(piece.split()) for piece in stripped]
+            # Omits repetitive yomigana if term is strictly in hiragana
+            if data['yomigana'] == self.term:
+                data['yomigana'] = ''
 
-        html_str = "\n".join(
-            [('【' + term + '】 ' + yomigana + '<ol>')] +
-            [('<li>' + d + '</li>') for d in definition] +
-            ['</ol>']
+            defs = chosen_body.find_all('span', style="text-indent:0;")
+            # If multiple definitions
+            if len(defs) > 1:
+                defs = [d.text for d in defs]
+                # Removes extra whitespaces in the definition strings
+                stripped = ["".join(piece.split()) for piece in defs]
+
+                data['body'] = "\n".join(
+                    ['<ol>'] +
+                    [('<li>' + d + '</li>') for d in stripped] +
+                    ['</ol>']
+                )
+            # If only one definition
+            else:
+                single_def = chosen_body.select_one("div div div").text
+                data['body'] = '<br>\n' + "".join(single_def.split())
+
+            return data
+
+        def parse_wiki_def():
+            data = {}
+
+            chosen_head = entry.find('h2', class_='midashigo')
+            chosen_body = chosen_head\
+                .find_next_sibling('div', class_="Wkpja")\
+                .find('p', class_=None)\
+                .text
+
+            data['yomigana'] = ''
+            data['body'] = '<br>\n' + chosen_body
+
+            return data
+
+        def parse_action(dictionary):
+            return {
+                'daijirin': parse_daijirin_def,
+                'wikipedia': parse_wiki_def
+            }[dictionary]()
+
+        definition = parse_action(self.jisho)
+
+        html = '【{0}】 {1}{2}'.format(
+            self.term, definition['yomigana'], definition['body']
         )
-        return html_str
-
-    # Checks for single definition and parses it in the html
-    else:
-        single_def = chosen_body.select_one("div div div").text
-
-        definition = "".join(single_def.split())
-        html_str = '【' + term + '】 ' + yomigana + '<br />\n' + definition
-        return html_str
+        return html
 
 
 class ScraperWindow(QDialog):
@@ -133,9 +150,9 @@ class ScraperWindow(QDialog):
 
         self.web = parent.web
 
-        self.setWindowIcon(QIcon( iconPath() ))
+        self.setWindowIcon(QIcon(iconPath()))
         self.setWindowTitle(
-            'Search 大辞林 definitions ' + 
+            'Search 辞書 definitions ' +
             '(can do multi-word search separated by spaces)'
         )
         self.resize(700, 500)
@@ -149,13 +166,25 @@ class ScraperWindow(QDialog):
         self.search_box.setFont(default_font)
         hl.addWidget(self.search_box)
 
+        self.jisho_select = QComboBox()
+        self.jisho_select.setFont(default_font)
+        self.jisho_select.setToolTip('Select dictionary to search on')
+        self.jisho_select.addItems(
+            [value['name']for key, value in jisho_config.items()]
+        )
+        self.jisho_select.currentIndexChanged.connect(
+            self.set_jisho)
+        hl.addWidget(self.jisho_select)
+
         self.search_btn = QPushButton(u' 検索 (\u23CE) ')
         self.search_btn.setFont(default_font)
+        self.search_btn.setToolTip('Search for input term(s)')
         self.search_btn.clicked.connect(self.onSearch)
         hl.addWidget(self.search_btn)
 
         self.add_btn = QPushButton(u' 追加 (Ctrl+\u23CE) ')
         self.add_btn.setFont(default_font)
+        self.add_btn.setToolTip('Add definitions to current note field')
         self.add_btn.clicked.connect(self.onAdd)
         hl.addWidget(self.add_btn)
 
@@ -170,6 +199,7 @@ class ScraperWindow(QDialog):
         vl.addWidget(self.output_box)
         self.setLayout(vl)
 
+        self.call_jisho = self.set_jisho()
         self.search_box.setFocus()
         self.show()
 
@@ -190,6 +220,14 @@ class ScraperWindow(QDialog):
         font.setPointSize(11)
         return font
 
+    def set_jisho(self):
+        jisho_name = str(self.jisho_select.currentText())
+        for jisho_k, jisho_v in jisho_config.items():
+            if jisho_v['name'] == jisho_name:
+                self.jisho = jisho_k
+                break
+        return
+
     def onSearch(self):
         query = self.search_box.text()
 
@@ -200,13 +238,13 @@ class ScraperWindow(QDialog):
 
         self.setWindowTitle('Searching...')
 
-        results = [Daijirin(term) for term in words]
+        results = [Scraper(term, self.jisho).scrape() for term in words]
 
         for i, result in enumerate(results):
             if result == 'cancelled':
                 pass
             elif result is None:
-                NoneFound(words[i])
+                NoneFound(words[i], self.jisho)
             else:
                 if self.output_box.toPlainText() == '':
                     self.output_box.appendPlainText(result)
@@ -217,7 +255,9 @@ class ScraperWindow(QDialog):
         self.search_box.setText('')
         self.search_box.setFocus()
         self.setWindowTitle(
-            'Search 大辞林 definitions (can do multi-word search separated by spaces)')
+            'Search 辞書 definitions ' +
+            '(can do multi-word search separated by spaces)'
+        )
 
     def keyPressEvent(self, event):
         mods = QApplication.keyboardModifiers()
@@ -228,9 +268,9 @@ class ScraperWindow(QDialog):
             self.onSearch()
 
         # Listens for 'Ctrl+Enter' kb shortcut
-        if (event.key() == Qt.Key_Enter and 
+        if (event.key() == Qt.Key_Enter and
             mods == Qt.ControlModifier or
-            event.key() == Qt.Key_Return and 
+            event.key() == Qt.Key_Return and
                 mods == Qt.ControlModifier):
             self.onAdd()
 
@@ -244,7 +284,7 @@ class ScraperWindow(QDialog):
         # Possible alternative: Line 395 / editor.py
         # self.note.fields[field] = html
         self.web.eval(
-            "document.execCommand('insertHTML', false, %s);" 
+            "document.execCommand('insertHTML', false, %s);"
             % json.dumps(data)
         )
 
@@ -257,7 +297,7 @@ class EntrySelectDialog(QDialog):
         self.choice_list = choice_list
 
         self.setWindowTitle('Choose entry')
-        self.setWindowIcon(QIcon( iconPath() ))        
+        self.setWindowIcon(QIcon(iconPath()))
 
         self.resize(300, 300)
 
@@ -306,19 +346,20 @@ class EntrySelectDialog(QDialog):
 
 
 class NoneFound(QMessageBox):
-    def __init__(self, search):
+    def __init__(self, search, jisho):
         super().__init__()
 
-        self.setWindowIcon(QIcon( iconPath() ))
+        self.setWindowIcon(QIcon(iconPath()))
         font = ScraperWindow.setupFont(self)
         self.setFont(font)
 
-        url = 'https://www.weblio.jp/content/{}'.format(search)
+        search_url = 'https://www.weblio.jp/content/{}'.format(search)
 
         self.setIcon(QMessageBox.Information)
-        self.setText("No 大辞林 definitions found for " + search)
+        self.setText("No " + jisho_config[jisho]['name'] +
+                     " definitions found for " + search)
         self.setInformativeText(
-            "<a href=\""+url+"\">Check weblio results " +
+            "<a href=\"" + search_url + "\">Check weblio results " +
             "for other dictionary definitions.</a>"
         )
         self.setWindowTitle("None found")
@@ -330,7 +371,7 @@ def addMyButton(buttons, editor):
     editor._links['大辞林'] = ScraperWindow
 
     buttons.insert(
-        0, 
+        0,
         editor._addButton(
             iconPath(),  # "/full/path/to/icon.png",
             "大辞林",  # link name
