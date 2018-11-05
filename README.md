@@ -34,6 +34,12 @@ This project began as a command line script. The script adds the definitions to 
 * os
 * pyperclip
 
+After Python and pip are installed, you can get the additional non-standard packages by running:
+```
+pip install -r requirements.txt
+```
+from this project's directory.
+
 ### Usage
 
 I suggest using Git Bash or some other bash terminal emulator on Windows.
