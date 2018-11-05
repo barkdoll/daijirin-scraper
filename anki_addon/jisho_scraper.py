@@ -375,7 +375,7 @@ def addMyButton(buttons, editor):
         editor._addButton(
             iconPath(),  # "/full/path/to/icon.png",
             "大辞林",  # link name
-            "Add definitions from 大辞林"
+            "Add 辞書 definitions"
         )
     )
     return buttons

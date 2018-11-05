@@ -9,5 +9,4 @@ This addon was created to grab and parse definitions from the
 
 License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 '''
-
-from . import daijirin_scraper
+from . import jisho_scraper
