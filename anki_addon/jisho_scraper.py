@@ -227,6 +227,8 @@ class ScraperWindow(QDialog):
         for jisho_k, jisho_v in jisho_config.items():
             if jisho_v['name'] == jisho_name:
                 self.jisho = jisho_k
+                self.jisho_name = jisho_config[self.jisho]['name']
+                self.url_id = jisho_config[self.jisho]['url_id']
                 break
         return
 
