@@ -235,7 +235,7 @@ class ScraperWindow(QDialog):
     def onSearch(self):
         query = self.search_box.text()
 
-        if query is '':
+        if query == '':
             return
         else:
             words = query.split()
